@@ -16,15 +16,15 @@ groups:
         dtype: text
         required: true
       - name: x
-        doc: "One of: APLRDV, communicating the axis and direction of the x coordinate"
+        doc: "One of: APLRSI, communicating the axis and direction of the x coordinate. For dorsal/ventral use 'S/I' (superior/inferior)."
         dtype: text
         required: true
-      - name: y
-        doc: "One of: APLRDV, communicating the axis and direction of the y coordinate"
+      - name: "y"
+        doc: "One of: APLRSI, communicating the axis and direction of the y coordinate. For dorsal/ventral use 'S/I' (superior/inferior)."
         dtype: text
         required: true
       - name: z
-        doc: "One of: APLRDV, communicating the axis and direction of the z coordinate"
+        doc: "One of: APLRSI, communicating the axis and direction of the z coordinate. For dorsal/ventral use 'S/I' (superior/inferior)."
         dtype: text
         required: true
   - neurodata_type_def: AnatonicalCoordinatesTable
@@ -45,7 +45,7 @@ groups:
         neurodata_type_inc: VectorData
         doc: "The x coordinate"
         quantity: 1
-      - name: y
+      - name: "y"
         neurodata_type_inc: VectorData
         doc: "The y coordinate"
         quantity: 1

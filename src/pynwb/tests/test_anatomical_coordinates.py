@@ -19,7 +19,8 @@ def test_create_anatonical_coordinates_table():
 
 electrodes_table = mock_ElectrodeTable()
 
-space = Space(name="space", space_name="CCF", origin="origin", units="um", x="A", y="D", z="L")
+#space = Space(name="space", space_name="CCF", origin="origin", units="um", x="A", y="S", z="L")
+space = Space.get_predefined_space("CCFv3")
 
 table = AnatonicalCoordinatesTable(
     name="MyAnatonicalLocalization",

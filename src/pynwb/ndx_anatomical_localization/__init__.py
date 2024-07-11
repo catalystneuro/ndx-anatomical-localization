@@ -27,22 +27,33 @@ TempSpace = get_class("Space", "ndx-anatomical-localization")
 TempAnatonicalCoordinatesTable = get_class("AnatonicalCoordinatesTable", "ndx-anatomical-localization")
 
 
-
-
-
 @register_class("Space", "ndx-anatomical-localization")
 class Space(TempSpace):
     def __init__(self, name, space_name, origin, units, x, y, z):
-        valid_values = ["A", "P", "L", "R", "D", "V"]
-        assert x in valid_values, "x must be one of 'A', 'P', 'L', 'R', 'D', 'V'"
-        assert y in valid_values, "y must be one of 'A', 'P', 'L', 'R', 'D', 'V'"
-        assert z in valid_values, "z must be one of 'A', 'P', 'L', 'R', 'D', 'V'"
+        valid_values = ["A", "P", "L", "R", "S", "I"]
+        assert x in valid_values, "x must be one of 'A', 'P', 'L', 'R', 'S', 'I'"
+        assert y in valid_values, "y must be one of 'A', 'P', 'L', 'R', 'S', 'I'"
+        assert z in valid_values, "z must be one of 'A', 'P', 'L', 'R', 'S', 'I'"
         
-        map = dict(A="AP", P="AP", L="LR", R="LR", D="DV", V="DV")
-        new_var = [map[var] for var in (x,y,z)]
-        assert len(set(new_var)) == 3, "x, y, and z must be unique dimensions (AP, LR, DV)"
+        map = {"A": "AP", "P": "AP", "L": "LR", "R": "LR", "S": "SI", "I": "SI"}
+        new_var = [map[var] for var in (x, y, z)]
+        assert len(set(new_var)) == 3, "x, y, and z must be unique dimensions (AP, LR, SI)"
 
         super().__init__(name=name, space_name=space_name, origin=origin, units=units, x=x, y=y, z=z)
+
+
+    @classmethod
+    def get_predefined_space(cls, space_name):
+        if space_name == "CCFv3":
+            return Space(
+                name="space",
+                space_name="CCFv3",
+                origin="In the middle of the anterior commissure",
+                units="um",
+                x="R",
+                y="A",
+                z="S"
+            )
 
 
 @register_class("AnatonicalCoordinatesTable", "ndx-anatomical-localization")
@@ -50,6 +61,7 @@ class AnatonicalCoordinatesTable(TempAnatonicalCoordinatesTable):
     def __init__(self, name, target, description, space, method):
         super().__init__(name=name, description=description, space=space, method=method)
         self.target_object.table = target
+
 
 
 # NOTE: `widgets/tetrode_series_widget.py` adds a "widget"
