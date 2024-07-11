@@ -29,17 +29,17 @@ TempAnatonicalCoordinatesTable = get_class("AnatonicalCoordinatesTable", "ndx-an
 
 @register_class("Space", "ndx-anatomical-localization")
 class Space(TempSpace):
-    def __init__(self, name, space_name, origin, units, x, y, z):
+    def __init__(self, name, space_name, origin, units, orientation):
+        assert len(orientation) == 3, "orientation must be a string of length 3"
         valid_values = ["A", "P", "L", "R", "S", "I"]
-        assert x in valid_values, "x must be one of 'A', 'P', 'L', 'R', 'S', 'I'"
-        assert y in valid_values, "y must be one of 'A', 'P', 'L', 'R', 'S', 'I'"
-        assert z in valid_values, "z must be one of 'A', 'P', 'L', 'R', 'S', 'I'"
+        for x in orientation:
+            assert x in valid_values, "orientation must be a string of 'A', 'P', 'L', 'R', 'S', 'I'"
         
         map = {"A": "AP", "P": "AP", "L": "LR", "R": "LR", "S": "SI", "I": "SI"}
-        new_var = [map[var] for var in (x, y, z)]
-        assert len(set(new_var)) == 3, "x, y, and z must be unique dimensions (AP, LR, SI)"
+        new_var = [map[var] for var in orientation]
+        assert len(set(new_var)) == 3, "orientation must be unique dimensions (AP, LR, SI)"
 
-        super().__init__(name=name, space_name=space_name, origin=origin, units=units, x=x, y=y, z=z)
+        super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
 
 
     @classmethod
@@ -50,9 +50,7 @@ class Space(TempSpace):
                 space_name="CCFv3",
                 origin="In the middle of the anterior commissure",
                 units="um",
-                x="R",
-                y="A",
-                z="S"
+                orientation="RAS"
             )
 
 

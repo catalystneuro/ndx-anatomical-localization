@@ -15,16 +15,8 @@ groups:
         doc: "units of the space"
         dtype: text
         required: true
-      - name: x
-        doc: "One of: APLRSI, communicating the axis and direction of the x coordinate. For dorsal/ventral use 'S/I' (superior/inferior)."
-        dtype: text
-        required: true
-      - name: "y"
-        doc: "One of: APLRSI, communicating the axis and direction of the y coordinate. For dorsal/ventral use 'S/I' (superior/inferior)."
-        dtype: text
-        required: true
-      - name: z
-        doc: "One of: APLRSI, communicating the axis and direction of the z coordinate. For dorsal/ventral use 'S/I' (superior/inferior)."
+      - name: orientation
+        doc: "A 3-letter string. One of APLRSI for each of x, y, and z. For example, the most common oreintation is 'RAS', which means x is right, y is anterior, and z is superior (a.a dorsal). For dorsal/ventral use 'S/I' (superior/inferior)."
         dtype: text
         required: true
   - neurodata_type_def: AnatonicalCoordinatesTable
