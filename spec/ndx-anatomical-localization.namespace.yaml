@@ -1,0 +1,13 @@
+namespaces:
+- author:
+  - Stephanie Prince
+  - Ben Dichter
+  contact:
+  - ben.dichter@catalystneuro.com
+  doc: Provide localization of objects (e.g. electrodes) against a reference image
+    (e.g. CCF)
+  name: ndx-anatomical-localization
+  schema:
+  - namespace: core
+  - source: ndx-anatomical-localization.extensions.yaml
+  version: 0.1.0
