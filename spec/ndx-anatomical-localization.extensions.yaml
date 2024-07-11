@@ -1,8 +1,64 @@
 groups:
-- neurodata_type_def: TetrodeSeries
-  neurodata_type_inc: ElectricalSeries
-  doc: An extension of ElectricalSeries to include the tetrode ID for each time series.
-  attributes:
-  - name: trode_id
-    dtype: int32
-    doc: The tetrode ID.
+  - neurodata_type_def: Space
+    neurodata_type_inc: NWBContainer
+    doc: "a space"
+    attributes:
+      - name: "space_name"
+        doc: "name of the space"
+        dtype: text
+        required: true
+      - name: origin
+        doc: "origin of the space"
+        dtype: text
+        required: true
+      - name: units
+        doc: "units of the space"
+        dtype: text
+        required: true
+      - name: x
+        doc: "One of: APLRDV, communicating the axis and direction of the x coordinate"
+        dtype: text
+        required: true
+      - name: y
+        doc: "One of: APLRDV, communicating the axis and direction of the y coordinate"
+        dtype: text
+        required: true
+      - name: z
+        doc: "One of: APLRDV, communicating the axis and direction of the z coordinate"
+        dtype: text
+        required: true
+  - neurodata_type_def: AnatonicalCoordinatesTable
+    neurodata_type_inc: DynamicTable
+    doc: "A table for storing coordinates"
+    links:
+      - target_type: Space
+        quantity: 1
+        doc: "The space in which the coordinates are defined"
+        name: space
+    attributes:
+      - name: method
+        doc: "The method used to determine the coordinates"
+        dtype: text
+        required: true
+    datasets:
+      - name: x
+        neurodata_type_inc: VectorData
+        doc: "The x coordinate"
+        quantity: 1
+      - name: y
+        neurodata_type_inc: VectorData
+        doc: "The y coordinate"
+        quantity: 1
+      - name: z
+        neurodata_type_inc: VectorData
+        doc: "The z coordinate"
+        quantity: 1
+      - name: target_object
+        neurodata_type_inc: DynamicTableRegion
+        doc: "The object to which the coordinates refer (e.g. electrode)"
+        quantity: 1
+      - name: brain_region
+        neurodata_type_inc: VectorData
+        doc: "The brain region associated with the localization"
+        dtype: text
+        quantity: "?"
