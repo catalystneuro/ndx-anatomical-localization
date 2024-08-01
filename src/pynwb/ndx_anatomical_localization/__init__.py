@@ -20,46 +20,7 @@ __spec_path = "/Users/bendichter/dev/ndx-anatomical-localization/spec/ndx-anatom
 # Load the namespace
 load_namespaces(str(__spec_path))
 
-# TODO: Define your classes here to make them accessible at the package level.
-# Either have PyNWB generate a class from the spec using `get_class` as shown
-# below or write a custom class and register it using the class decorator
-TempSpace = get_class("Space", "ndx-anatomical-localization")
-TempAnatonicalCoordinatesTable = get_class("AnatonicalCoordinatesTable", "ndx-anatomical-localization")
-
-
-@register_class("Space", "ndx-anatomical-localization")
-class Space(TempSpace):
-    def __init__(self, name, space_name, origin, units, orientation):
-        assert len(orientation) == 3, "orientation must be a string of length 3"
-        valid_values = ["A", "P", "L", "R", "S", "I"]
-        for x in orientation:
-            assert x in valid_values, "orientation must be a string of 'A', 'P', 'L', 'R', 'S', 'I'"
-        
-        map = {"A": "AP", "P": "AP", "L": "LR", "R": "LR", "S": "SI", "I": "SI"}
-        new_var = [map[var] for var in orientation]
-        assert len(set(new_var)) == 3, "orientation must be unique dimensions (AP, LR, SI)"
-
-        super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
-
-
-    @classmethod
-    def get_predefined_space(cls, space_name):
-        if space_name == "CCFv3":
-            return Space(
-                name="space",
-                space_name="CCFv3",
-                origin="In the middle of the anterior commissure",
-                units="um",
-                orientation="RAS"
-            )
-
-
-@register_class("AnatonicalCoordinatesTable", "ndx-anatomical-localization")
-class AnatonicalCoordinatesTable(TempAnatonicalCoordinatesTable):
-    def __init__(self, name, target, description, space, method):
-        super().__init__(name=name, description=description, space=space, method=method)
-        self.target_object.table = target
-
+from .ndx_anatomical_localization import Space, AnatomicalCoordinatesTable, Localization
 
 
 # NOTE: `widgets/tetrode_series_widget.py` adds a "widget"

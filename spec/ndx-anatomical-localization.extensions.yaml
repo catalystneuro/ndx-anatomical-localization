@@ -1,4 +1,15 @@
 groups:
+  - neurodata_type_def: Localization
+    neurodata_type_inc: LabMetaData
+    name: localization
+    doc: "A class for storing anatomical localization information"
+    groups:
+      - neurodata_type_inc: AnatomicalCoordinatesTable
+        quantity: "*"
+        doc: "A table for storing coordinates"
+      - neurodata_type_inc: Space
+        quantity: "*"
+        doc: "A space in which the coordinates are defined"
   - neurodata_type_def: Space
     neurodata_type_inc: NWBContainer
     doc: "a space"
@@ -19,7 +30,7 @@ groups:
         doc: "A 3-letter string. One of APLRSI for each of x, y, and z. For example, the most common orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a dorsal). For dorsal/ventral use 'S/I' (superior/inferior)."
         dtype: text
         required: true
-  - neurodata_type_def: AnatonicalCoordinatesTable
+  - neurodata_type_def: AnatomicalCoordinatesTable
     neurodata_type_inc: DynamicTable
     doc: "A table for storing coordinates"
     links:

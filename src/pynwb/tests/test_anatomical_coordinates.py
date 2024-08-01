@@ -1,36 +1,38 @@
-"""Unit and integration tests for the example TetrodeSeries extension neurodata type.
-
-TODO: Modify these tests to test your extension neurodata type.
-"""
-
+"""Unit and integration tests for the new neurodata type."""
+from pynwb import NWBHDF5IO
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing.mock.ecephys import mock_ElectrodeTable
 
-from ndx_anatomical_localization import AnatonicalCoordinatesTable, Space
+from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Localization
 
 
-def test_create_anatonical_coordinates_table():
+def test_create_anatomical_coordinates_table():
 
-    electrodes_table = mock_ElectrodeTable()
+    nwbfile = mock_NWBFile()
 
-    table = AnatonicalCoordinatesTable(name="MyAnatonicalLocalization", target=electrodes_table, description="Anatonical coordinates table")
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = Space.get_predefined_space("CCFv3")
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="MyAnatomicalLocalization",
+        target=electrodes_table,
+        description="Anatomical coordinates table",
+        method="method",
+        space=space,
+    )
     [table.add_row(x=1.0, y=2.0, z=3.0, brain_region="CA1", target_object=x) for x in range(5)]
 
+    localization.add_anatomical_coordinates_tables([table])
 
-electrodes_table = mock_ElectrodeTable()
+    with NWBHDF5IO("test.nwb", "w") as io:
+        io.write(nwbfile)
 
-#space = Space(name="space", space_name="CCF", origin="origin", units="um", x="A", y="S", z="L")
-space = Space.get_predefined_space("CCFv3")
+    with NWBHDF5IO("test.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
 
-table = AnatonicalCoordinatesTable(
-    name="MyAnatonicalLocalization",
-    target=electrodes_table,
-    description="Anatonical coordinates table",
-    method="method",
-    space=space,
-)
-[table.add_row(x=1.0, y=2.0, z=3.0, brain_region="CA1", target_object=x) for x in range(5)]
-
-print(table)
-
-print(space)
+        assert read_nwbfile.lab_meta_data["localization"]["MyAnatomicalLocalization"].space.space_name == "CCFv3"
