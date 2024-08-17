@@ -8,14 +8,12 @@ except ImportError:
     from importlib_resources import files
 
 # # Get path to the namespace.yaml file with the expected location when installed not in editable mode
-# __location_of_this_file = files(__name__)
-# __spec_path = __location_of_this_file / "spec" / "ndx-anatomical-localization.namespace.yaml"
+__location_of_this_file = files(__name__)
+__spec_path = __location_of_this_file / "spec" / "ndx-anatomical-localization.namespace.yaml"
 
 # # If that path does not exist, we are likely running in editable mode. Use the local path instead
-# if not os.path.exists(__spec_path):
-#     __spec_path = __location_of_this_file.parent.parent.parent / "spec" / "ndx-anatomical-localization.namespace.yaml"
-
-__spec_path = "/Users/bendichter/dev/ndx-anatomical-localization/spec/ndx-anatomical-localization.namespace.yaml"
+if not os.path.exists(__spec_path):
+    __spec_path = __location_of_this_file.parent.parent.parent / "spec" / "ndx-anatomical-localization.namespace.yaml"
 
 # Load the namespace
 load_namespaces(str(__spec_path))
