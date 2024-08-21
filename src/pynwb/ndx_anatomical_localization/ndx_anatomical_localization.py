@@ -1,5 +1,6 @@
 from hdmf.common import DynamicTable
-from pynwb import get_class, register_class, docval
+from hdmf.utils import docval, get_docval, AllowPositional
+from pynwb import get_class, register_class
 
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
@@ -26,6 +27,7 @@ class Space(TempSpace):
         {"name": "origin", "type": str, "doc": "origin of the space"},
         {"name": "units", "type": str, "doc": "units of the space"},
         {"name": "orientation", "type": str, "doc": "orientation of the space"},
+        allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, name, space_name, origin, units, orientation):
         assert len(orientation) == 3, "orientation must be a string of length 3"
@@ -51,13 +53,23 @@ class Space(TempSpace):
 class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
 
     @docval(
-        {"name": "name", "type": str, "doc": "name of the table"},
-        {"name": "target", "type": DynamicTable, "doc": "target table"},
-        {"name": "description", "type": str, "doc": "description of the table"},
         {"name": "space", "type": Space, "doc": "space of the table"},
         {"name": "method", "type": str, "doc": "method of the table"},
+        {"name": "target", "type": DynamicTable,
+         "doc": 'target table. ignored if a "target_object" column is provided in "columns"', "default": None},
+        *get_docval(DynamicTable.__init__),
+        allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
+        columns = kwargs.get("columns")
         target = kwargs.pop("target")
+        if not columns or "target_object" not in [c.name for c in columns]:
+            # set the target table of the "target_object" column only if the "target_object" column is not in "columns"
+            if target is None:
+                raise ValueError(
+                    '"target" (the target table that contains the objects that have these coordinates) '
+                    'must be provided in AnatomicalCoordinatesTable.__init__ '
+                    'if the "target_object" column is not in "columns".')
+            kwargs["target_tables"] = {"target_object": target}
+
         super().__init__(**kwargs)
-        self.target_object.table = target
