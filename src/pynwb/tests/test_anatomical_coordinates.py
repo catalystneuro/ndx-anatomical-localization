@@ -27,7 +27,7 @@ def test_create_anatomical_coordinates_table():
         method="method",
         space=space,
     )
-    [table.add_row(x=1.0, y=2.0, z=3.0, brain_region="CA1", target_object=x) for x in range(5)]
+    [table.add_row(x=1.0, y=2.0, z=3.0, brain_region="CA1", localized_entity=x) for x in range(5)]
 
     localization.add_anatomical_coordinates_tables([table])
 
@@ -43,10 +43,10 @@ def test_create_anatomical_coordinates_table():
 
         assert read_coordinates_table.method == "method"
         assert read_coordinates_table.description == "Anatomical coordinates table"
-        assert read_coordinates_table.target_object.table is read_electrodes_table
+        assert read_coordinates_table.localized_entity.table is read_electrodes_table
         assert read_coordinates_table.space.fields == Space.get_predefined_space("CCFv3").fields
         npt.assert_array_equal(read_coordinates_table["x"].data[:], np.array([1.0, 1.0, 1.0, 1.0, 1.0]))
         npt.assert_array_equal(read_coordinates_table["y"].data[:], np.array([2.0, 2.0, 2.0, 2.0, 2.0]))
         npt.assert_array_equal(read_coordinates_table["z"].data[:], np.array([3.0, 3.0, 3.0, 3.0, 3.0]))
         npt.assert_array_equal(read_coordinates_table["brain_region"].data[:], np.array(["CA1", "CA1", "CA1", "CA1", "CA1"]))
-        npt.assert_array_equal(read_coordinates_table["target_object"].data[:], np.array([0, 1, 2, 3, 4]))
+        npt.assert_array_equal(read_coordinates_table["localized_entity"].data[:], np.array([0, 1, 2, 3, 4]))

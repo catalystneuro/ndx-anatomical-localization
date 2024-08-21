@@ -59,7 +59,7 @@ groups:
         neurodata_type_inc: VectorData
         doc: "The z coordinate"
         quantity: 1
-      - name: target_object
+      - name: localized_entity
         neurodata_type_inc: DynamicTableRegion
         doc: "The object to which the coordinates refer (e.g. electrode)"
         quantity: 1
