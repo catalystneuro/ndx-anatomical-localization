@@ -18,10 +18,10 @@ pip install git+https://github.com/catalystneuro/ndx-anatomical-localization.git
 ### Spaces
 `Space` objects are used to define the coordinate system in which the objects are localized.
 Each Space object has the following attributes:
-  * space_name: The name of the space (e.g. "CCFv3")
-  * origin: The origin of the space (e.g. "bregma")
-  * units: The units of the space (e.g. "um")
-  * orientation: A 3-letter string. One of A, P, L, R, S, I for each of x, y, and z (e.g. "RAS").
+  * `space_name`: The name of the space (e.g. "CCFv3")
+  * `origin`: The origin of the space (e.g. "bregma")
+  * `units`: The units of the space (e.g. "um")
+  * `orientation`: A 3-letter string. One of A, P, L, R, S, I for each of x, y, and z (e.g. "RAS").
 
 You can define a custom space by creating a `Space` object with the desired attributes:
 
