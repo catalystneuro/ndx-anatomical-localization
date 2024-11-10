@@ -29,6 +29,7 @@ You can define a custom space by creating a `Space` object with the desired attr
 from ndx_anatomical_localization import Space
 
 space = Space(
+    name="MySpace",
     space_name="MySpace",
     origin="bregma",
     units="um",

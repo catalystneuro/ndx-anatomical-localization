@@ -8,6 +8,15 @@ import numpy.testing as npt
 from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Localization
 
 
+def test_create_custom_space():
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
+
 def test_create_anatomical_coordinates_table():
 
     nwbfile = mock_NWBFile()
