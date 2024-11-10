@@ -6,7 +6,7 @@ groups:
     groups:
       - neurodata_type_inc: AnatomicalCoordinatesTable
         quantity: "*"
-        doc: "A table for storing coordinates"
+        doc: "A table for storing localization in a space"
       - neurodata_type_inc: Space
         quantity: "*"
         doc: "A space in which the coordinates are defined"
@@ -19,15 +19,15 @@ groups:
         dtype: text
         required: true
       - name: origin
-        doc: "origin of the space"
+        doc: "A description of where (0,0,0) is in the space. For example, 'bregma' is a common origin for mice."
         dtype: text
         required: true
       - name: units
-        doc: "units of the space"
+        doc: "The units of measurement for the x,y,z coordinates. For example, 'mm' for millimeters."
         dtype: text
         required: true
       - name: orientation
-        doc: "A 3-letter string. One of APLRSI for each of x, y, and z. For example, the most common
+        doc: "A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, the most common
           orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a. dorsal).
           For dorsal/ventral use 'S/I' (superior/inferior). In the AnatomicalCoordinatesTable, an orientation of
           'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z))."
@@ -61,7 +61,7 @@ groups:
         quantity: 1
       - name: localized_entity
         neurodata_type_inc: DynamicTableRegion
-        doc: "The object to which the coordinates refer (e.g. electrode)"
+        doc: "A reference to the object being localized (e.g. electrode)"
         quantity: 1
       - name: brain_region
         neurodata_type_inc: VectorData

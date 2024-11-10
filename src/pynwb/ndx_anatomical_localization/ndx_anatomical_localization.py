@@ -22,11 +22,26 @@ PREDEFINED_SPACES = {
 class Space(TempSpace):
 
     @docval(
-        {"name": "name", "type": str, "doc": "name of the space"},
+        {"name": "name", "type": str, "doc": "name of the NWB object"},
         {"name": "space_name", "type": str, "doc": "name of the space"},
-        {"name": "origin", "type": str, "doc": "origin of the space"},
-        {"name": "units", "type": str, "doc": "units of the space"},
-        {"name": "orientation", "type": str, "doc": "orientation of the space"},
+        {
+            "name": "origin",
+            "type": str,
+            "doc": "A description of where (0,0,0) is in the space. For example, 'bregma' is a common origin for mice.",
+        },
+        {
+            "name": "units",
+            "type": str,
+            "doc": "The units of measurement for the x,y,z coordinates. For example, 'mm' for millimeters.",
+        },
+        {
+            "name": "orientation",
+            "type": str,
+            "doc": """A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, the most common
+          orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a. dorsal).
+          For dorsal/ventral use 'S/I' (superior/inferior). In the AnatomicalCoordinatesTable, an orientation of
+          'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z)).""",
+        },
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, name, space_name, origin, units, orientation):
