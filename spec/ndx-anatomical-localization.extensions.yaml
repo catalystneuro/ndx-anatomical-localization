@@ -12,30 +12,40 @@ groups:
         doc: "A space in which the coordinates are defined"
   - neurodata_type_def: Space
     neurodata_type_inc: NWBContainer
-    doc: "a space"
+    doc: >
+      This class defines a space in which coordinates are defined. It defines a reference image and the orientation
+      and origin of the axes. The default space is CCFv3 with BrainGlobe coordinates."
     attributes:
       - name: "space_name"
         doc: "name of the space"
         dtype: text
         required: true
       - name: origin
-        doc: "A description of where (0,0,0) is in the space. For example, 'bregma' is a common origin for mice."
+        doc: >
+          A description of where (0,0,0) is in the space. For example, 'bregma' is a common origin for mice.
+          If omitted, it is assumed to be the corner opposite to the orientation. e.g. if the orientation is 'PIL' 
+          (posterior, inferior, left; the default), the origin is assumed to be the anterior, superior, right corner.
+          For BrainGlobe, this value is not needed, but it is needed if you want to use, for example, IBL coordinates.
         dtype: text
-        required: true
+        required: false
       - name: units
         doc: "The units of measurement for the x,y,z coordinates. For example, 'mm' for millimeters."
         dtype: text
         required: true
       - name: orientation
-        doc: "A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, the most common
-          orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a. dorsal).
-          For dorsal/ventral use 'S/I' (superior/inferior). In the AnatomicalCoordinatesTable, an orientation of
-          'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z))."
+        doc: >
+          A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, default is 'PIL', which means
+          x is posterior, y is inferior (i.e. ventral), and z is left. For dorsal/ventral use 'S/I' (superior/inferior).
+          The default is 'PIL', which is the standard for BrainGlobe."
         dtype: text
         required: true
+        default_value: "PIL"
   - neurodata_type_def: AnatomicalCoordinatesTable
     neurodata_type_inc: DynamicTable
-    doc: "A table for storing anatomical coordinates for rows of another table determined using a single method"
+    doc: >
+      A table for storing anatomical localization of an object in a space. This is done by referencing rows of
+      another table. This allows for the same object to be localized in multiple spaces or using multiple different
+      methods.
     links:
       - target_type: Space
         quantity: 1

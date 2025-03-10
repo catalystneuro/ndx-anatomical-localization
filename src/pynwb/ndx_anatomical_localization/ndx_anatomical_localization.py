@@ -24,24 +24,28 @@ class Space(TempSpace):
     @docval(
         {"name": "name", "type": str, "doc": "name of the NWB object"},
         {"name": "space_name", "type": str, "doc": "name of the space"},
-        {
-            "name": "origin",
-            "type": str,
-            "doc": "A description of where (0,0,0) is in the space. For example, 'bregma' is a common origin for mice.",
-        },
-        {
-            "name": "units",
-            "type": str,
-            "doc": "The units of measurement for the x,y,z coordinates. For example, 'mm' for millimeters.",
-        },
-        {
-            "name": "orientation",
-            "type": str,
-            "doc": """A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, the most common
-          orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a. dorsal).
-          For dorsal/ventral use 'S/I' (superior/inferior). In the AnatomicalCoordinatesTable, an orientation of
-          'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z)).""",
-        },
+        dict(
+            name="origin",
+            type=str,
+            doc="""A description of where (0,0,0) is in the space. For example, 'bregma' is a common origin for mice.
+Another approach is to use a corner of the atlas bounding box. For example, BrainGlobe uses the anterior,
+superior, right corner as the origin for all of their atlases. In this case, you would specify this as 'ASR'.
+The orientation should then be the opposite for each letter: 'PIL'. We use this as the default here.""",
+            default="ASR",
+        ),
+        dict(
+            name="units",
+            type=str,
+            doc="The units of measurement for the x,y,z coordinates. For example, 'mm' for millimeters.",
+        ),
+        dict(
+            name="orientation",
+            type=str,
+            doc="""A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, default is 'PIL', which means
+x is posterior, y is inferior (i.e. ventral), and z is left. For dorsal/ventral use 'S/I' (superior/inferior).
+The default is 'PIL', which is the standard for BrainGlobe.""",
+            default="PIL",
+        ),
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, name, space_name, origin, units, orientation):
@@ -53,6 +57,11 @@ class Space(TempSpace):
         map = {"A": "AP", "P": "AP", "L": "LR", "R": "LR", "S": "SI", "I": "SI"}
         new_var = [map[var] for var in orientation]
         assert len(set(new_var)) == 3, "orientation must be unique dimensions (AP, LR, SI)"
+
+        opposites = {"A": "P", "P": "A", "L": "R", "R": "L", "S": "I", "I": "S"}
+        if len(origin) == 3 and [x in valid_values for x in origin]:
+            for x,y in zip(origin, orientation):
+                assert x != opposites[y], "origin and orientation must be in opposite directions"
 
         super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
 
