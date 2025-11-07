@@ -18,10 +18,10 @@ pip install git+https://github.com/catalystneuro/ndx-anatomical-localization.git
 ### Spaces
 `Space` objects are used to define the coordinate system in which the objects are localized.
 Each Space object has the following attributes:
-  * `space_name`: The name of the space (e.g. "CCFv3")
-  * `origin`: The origin of the space (e.g. "bregma")
+  * `space_name`: The name of the space (e.g. "AllenCCFv3")
+  * `origin`: The origin of the space (e.g. "bregma" or "Dorsal-left-posterior corner of the 3D image volume")
   * `units`: The units of the space (e.g. "um")
-  * `orientation`: A 3-letter string. One of A, P, L, R, S, I for each of x, y, and z (e.g. "RAS").
+  * `orientation`: A 3-letter string using A (Anterior), P (Posterior), L (Left), R (Right), S (Superior), I (Inferior) for each of x, y, and z axes (e.g. "RAS" or "ASL").
 
 You can define a custom space by creating a `Space` object with the desired attributes:
 
@@ -37,14 +37,28 @@ space = Space(
 )
 ```
 
-The Allen Institute Common Coordinate Framework v3 is predefined and can be accessed using the `get_predefined_space` method, or you can define a custom space.
-You can use the following syntax to use this space:
+#### Allen Mouse Brain Common Coordinate Framework v3 (CCFv3)
+
+The Allen Institute CCFv3 atlas is available as a canonical space class `AllenCCFv3Space` with fixed orientation and origin parameters:
+- **Orientation**: ASL (x=Anterior-Posterior, y=Superior-Inferior/Dorsal-Ventral, z=Left-Right)
+- **Units**: micrometers (um)
+- **Resolution**: 10 micrometers isotropic
+- **Origin**: Dorsal-left-posterior corner of the 3D image volume
+- **Dimensions**: 1320 × 800 × 1140 voxels
+
+You can use this canonical space in two ways:
 
 ```python
-from ndx_anatomical_localization import Space
+from ndx_anatomical_localization import AllenCCFv3Space, Space
 
+# Option 1: Direct instantiation
+space = AllenCCFv3Space()
+
+# Option 2: Using the predefined space method
 space = Space.get_predefined_space("CCFv3")
 ```
+
+Both methods return an `AllenCCFv3Space` instance, which can be programmatically identified using `isinstance(space, AllenCCFv3Space)`.
 
 ### AnatomicalCoordinatesTable
 Once you have a `Space` object, you can create an `AnatomicalCoordinatesTable`.

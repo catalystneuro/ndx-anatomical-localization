@@ -33,6 +33,11 @@ groups:
           'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z))."
         dtype: text
         required: true
+  - neurodata_type_def: AllenCCFv3Space
+    neurodata_type_inc: Space
+    doc: "The Allen Mouse Brain Common Coordinate Framework version 3 (2020). This canonical space uses ASL orientation
+          (x=anterior-posterior, y=superior-inferior/dorsal-ventral, z=left-right) with 10 micrometer resolution.
+          The origin (0,0,0) is at the dorsal-left-posterior corner of the 3D image volume."
   - neurodata_type_def: AnatomicalCoordinatesTable
     neurodata_type_inc: DynamicTable
     doc: "A table for storing anatomical coordinates for rows of another table determined using a single method"

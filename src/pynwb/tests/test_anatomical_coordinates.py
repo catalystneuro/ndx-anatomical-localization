@@ -5,7 +5,7 @@ from pynwb.testing.mock.ecephys import mock_ElectrodeTable
 import numpy as np
 import numpy.testing as npt
 
-from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Localization
+from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, AllenCCFv3Space, Localization
 
 
 def test_create_custom_space():
@@ -59,3 +59,70 @@ def test_create_anatomical_coordinates_table():
         npt.assert_array_equal(read_coordinates_table["z"].data[:], np.array([3.0, 3.0, 3.0, 3.0, 3.0]))
         npt.assert_array_equal(read_coordinates_table["brain_region"].data[:], np.array(["CA1", "CA1", "CA1", "CA1", "CA1"]))
         npt.assert_array_equal(read_coordinates_table["localized_entity"].data[:], np.array([0, 1, 2, 3, 4]))
+
+
+def test_create_allen_ccfv3_space():
+    """Test creating AllenCCFv3Space directly."""
+    space = AllenCCFv3Space()
+
+    assert space.name == "space"
+    assert space.space_name == "AllenCCFv3"
+    assert space.orientation == "ASL"
+    assert space.units == "um"
+    assert space.origin == "Dorsal-left-posterior corner of the 3D image volume"
+
+
+def test_create_allen_ccfv3_space_custom_name():
+    """Test creating AllenCCFv3Space with custom name."""
+    space = AllenCCFv3Space(name="my_ccf_space")
+
+    assert space.name == "my_ccf_space"
+    assert space.space_name == "AllenCCFv3"
+    assert space.orientation == "ASL"
+
+
+def test_get_predefined_space_returns_allen_ccfv3_space():
+    """Test that Space.get_predefined_space('CCFv3') returns AllenCCFv3Space instance."""
+    space = Space.get_predefined_space("CCFv3")
+
+    assert isinstance(space, AllenCCFv3Space)
+    assert space.space_name == "AllenCCFv3"
+    assert space.orientation == "ASL"
+    assert space.units == "um"
+
+
+def test_allen_ccfv3_space_write_read():
+    """Test that AllenCCFv3Space type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = AllenCCFv3Space()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="CCFLocalization",
+        target=electrodes_table,
+        description="CCF coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=100.0, y=200.0, z=300.0, brain_region="VISp", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO("test_ccf.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO("test_ccf.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_localization = read_nwbfile.lab_meta_data["localization"]
+        read_table = read_localization.anatomical_coordinates_tables["CCFLocalization"]
+
+        # Verify that the space is still an AllenCCFv3Space instance
+        assert isinstance(read_table.space, AllenCCFv3Space)
+        assert read_table.space.space_name == "AllenCCFv3"
+        assert read_table.space.orientation == "ASL"
+        assert read_table.space.origin == "Dorsal-left-posterior corner of the 3D image volume"
