@@ -10,7 +10,7 @@ Localization = get_class("Localization", "ndx-anatomical-localization")
 
 PREDEFINED_SPACES = {
     "CCFv3": {
-        "name": "space",
+        "name": "AllenCCFv3",
         "space_name": "AllenCCFv3",
         "origin": "Dorsal-left-posterior corner of the 3D image volume",
         "units": "um",
