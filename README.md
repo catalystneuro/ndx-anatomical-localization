@@ -44,21 +44,17 @@ The Allen Institute CCFv3 atlas is available as a canonical space class `AllenCC
 - **Units**: micrometers (um)
 - **Resolution**: 10 micrometers isotropic
 - **Origin**: Dorsal-left-posterior corner of the 3D image volume
-- **Dimensions**: 1320 × 800 × 1140 voxels
+- **Dimensions**: 1320 x 800 x 1140 voxels
 
-You can use this canonical space in two ways:
+You can create this canonical space directly:
 
 ```python
-from ndx_anatomical_localization import AllenCCFv3Space, Space
+from ndx_anatomical_localization import AllenCCFv3Space
 
-# Option 1: Direct instantiation
 space = AllenCCFv3Space()
-
-# Option 2: Using the predefined space method
-space = Space.get_predefined_space("CCFv3")
 ```
 
-Both methods return an `AllenCCFv3Space` instance, which can be programmatically identified using `isinstance(space, AllenCCFv3Space)`.
+The `AllenCCFv3Space` instance can be programmatically identified using `isinstance(space, AllenCCFv3Space)`.
 
 ### AnatomicalCoordinatesTable
 Once you have a `Space` object, you can create an `AnatomicalCoordinatesTable`.
@@ -74,7 +70,7 @@ Within `Localization`, you can create multiple `Space` and `AnatomicalCoordinate
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing.mock.ecephys import mock_ElectrodeTable
 
-from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Localization
+from ndx_anatomical_localization import AnatomicalCoordinatesTable, AllenCCFv3Space, Localization
 
 
 nwbfile = mock_NWBFile()
@@ -84,7 +80,7 @@ nwbfile.add_lab_meta_data([localization])
 
 electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
 
-space = Space.get_predefined_space("CCFv3")
+space = AllenCCFv3Space()
 localization.add_spaces([space])
 
 table = AnatomicalCoordinatesTable(

@@ -8,16 +8,6 @@ TempAllenCCFv3Space = get_class("AllenCCFv3Space", "ndx-anatomical-localization"
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 Localization = get_class("Localization", "ndx-anatomical-localization")
 
-PREDEFINED_SPACES = {
-    "CCFv3": {
-        "name": "AllenCCFv3",
-        "space_name": "AllenCCFv3",
-        "origin": "Dorsal-left-posterior corner of the 3D image volume",
-        "units": "um",
-        "orientation": "ASL",
-    }
-}
-
 
 @register_class("Space", "ndx-anatomical-localization")
 class Space(TempSpace):
@@ -56,17 +46,6 @@ class Space(TempSpace):
         assert len(set(new_var)) == 3, "orientation must be unique dimensions (AP, LR, SI)"
 
         super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
-
-    @classmethod
-    def get_predefined_space(cls, space_name):
-        if space_name in PREDEFINED_SPACES:
-            # Return AllenCCFv3Space for CCFv3, generic Space for others
-            if space_name == "CCFv3":
-                # AllenCCFv3Space only takes 'name' parameter
-                return AllenCCFv3Space(name=PREDEFINED_SPACES[space_name]["name"])
-            return cls(**PREDEFINED_SPACES[space_name])
-        else:
-            raise ValueError(f"Space {space_name} is not predefined")
 
 
 @register_class("AllenCCFv3Space", "ndx-anatomical-localization")

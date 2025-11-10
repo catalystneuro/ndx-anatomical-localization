@@ -26,7 +26,7 @@ def test_create_anatomical_coordinates_table():
 
     electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
 
-    space = Space.get_predefined_space("CCFv3")
+    space = AllenCCFv3Space()
     localization.add_spaces([space])
 
     table = AnatomicalCoordinatesTable(
@@ -53,7 +53,8 @@ def test_create_anatomical_coordinates_table():
         assert read_coordinates_table.method == "method"
         assert read_coordinates_table.description == "Anatomical coordinates table"
         assert read_coordinates_table.localized_entity.table is read_electrodes_table
-        assert read_coordinates_table.space.fields == Space.get_predefined_space("CCFv3").fields
+        assert isinstance(read_coordinates_table.space, AllenCCFv3Space)
+        assert read_coordinates_table.space.space_name == "AllenCCFv3"
         npt.assert_array_equal(read_coordinates_table["x"].data[:], np.array([1.0, 1.0, 1.0, 1.0, 1.0]))
         npt.assert_array_equal(read_coordinates_table["y"].data[:], np.array([2.0, 2.0, 2.0, 2.0, 2.0]))
         npt.assert_array_equal(read_coordinates_table["z"].data[:], np.array([3.0, 3.0, 3.0, 3.0, 3.0]))
@@ -79,16 +80,6 @@ def test_create_allen_ccfv3_space_custom_name():
     assert space.name == "my_ccf_space"
     assert space.space_name == "AllenCCFv3"
     assert space.orientation == "ASL"
-
-
-def test_get_predefined_space_returns_allen_ccfv3_space():
-    """Test that Space.get_predefined_space('CCFv3') returns AllenCCFv3Space instance."""
-    space = Space.get_predefined_space("CCFv3")
-
-    assert isinstance(space, AllenCCFv3Space)
-    assert space.space_name == "AllenCCFv3"
-    assert space.orientation == "ASL"
-    assert space.units == "um"
 
 
 def test_allen_ccfv3_space_write_read():
