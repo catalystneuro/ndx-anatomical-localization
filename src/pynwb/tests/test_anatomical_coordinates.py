@@ -66,7 +66,7 @@ def test_create_allen_ccfv3_space():
     """Test creating AllenCCFv3Space directly."""
     space = AllenCCFv3Space()
 
-    assert space.name == "space"
+    assert space.name == "AllenCCFv3"
     assert space.space_name == "AllenCCFv3"
     assert space.orientation == "ASL"
     assert space.units == "um"

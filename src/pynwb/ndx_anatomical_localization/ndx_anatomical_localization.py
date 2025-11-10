@@ -60,10 +60,10 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
     """
 
     @docval(
-        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "space"},
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "AllenCCFv3"},
         allow_positional=AllowPositional.ERROR,
     )
-    def __init__(self, name="space"):
+    def __init__(self, name="AllenCCFv3"):
         super().__init__(
             name=name,
             space_name="AllenCCFv3",
