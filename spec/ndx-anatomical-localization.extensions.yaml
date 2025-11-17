@@ -38,6 +38,23 @@ groups:
     doc: "The Allen Mouse Brain Common Coordinate Framework version 3 (2020). This canonical space uses ASL orientation
           (x=anterior-posterior, y=superior-inferior/dorsal-ventral, z=left-right) with 10 micrometer resolution.
           The origin (0,0,0) is at the dorsal-left-posterior corner of the 3D image volume."
+    attributes:
+      - name: space_name
+        dtype: text
+        value: AllenCCFv3
+        doc: "Name of the space (fixed to AllenCCFv3)"
+      - name: origin
+        dtype: text
+        value: Dorsal-left-posterior corner of the 3D image volume
+        doc: "Origin of the coordinate system (fixed)"
+      - name: units
+        dtype: text
+        value: um
+        doc: "Units of measurement (fixed to micrometers)"
+      - name: orientation
+        dtype: text
+        value: ASL
+        doc: "Orientation of the coordinate system (fixed to ASL)"
   - neurodata_type_def: AnatomicalCoordinatesTable
     neurodata_type_inc: DynamicTable
     doc: "A table for storing anatomical coordinates for rows of another table determined using a single method"

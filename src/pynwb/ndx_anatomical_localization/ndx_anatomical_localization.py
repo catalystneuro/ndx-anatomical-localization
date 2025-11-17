@@ -64,13 +64,7 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, name="AllenCCFv3"):
-        super().__init__(
-            name=name,
-            space_name="AllenCCFv3",
-            origin="Dorsal-left-posterior corner of the 3D image volume",
-            units="um",
-            orientation="ASL",
-        )
+        super().__init__(name=name)
 
 
 @register_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
