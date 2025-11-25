@@ -18,7 +18,7 @@ if not os.path.exists(__spec_path):
 # Load the namespace
 load_namespaces(str(__spec_path))
 
-from .ndx_anatomical_localization import Space, AnatomicalCoordinatesTable, Localization
+from .ndx_anatomical_localization import Space, AnatomicalCoordinatesTable, Localization, AnatomicalCoordinatesImage
 
 
 # NOTE: `widgets/tetrode_series_widget.py` adds a "widget"
