@@ -1,4 +1,5 @@
 from hdmf.common import DynamicTable
+from numpy import ndarray
 from pynwb.image import Image
 from pynwb.ophys import ImagingPlane
 from hdmf.utils import get_docval, AllowPositional
@@ -116,36 +117,47 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
         },
         {
             "name": "x",
-            "type": (list, tuple),
+            "type": ("array_data", "data"),
             "doc": "2D array containing X coordinates for each pixel (width x height)",
         },
         {
             "name": "y",
-            "type": (list, tuple),
+            "type": ("array_data", "data"),
             "doc": "2D array containing Y coordinates for each pixel (width x height)",
         },
         {
             "name": "z",
-            "type": (list, tuple),
+            "type": ("array_data", "data"),
             "doc": "2D array containing Z coordinates for each pixel (width x height)",
         },
         {
             "name": "brain_region",
-            "type": (list, type(None)),
+            "type": ("array_data", "data"),
             "doc": "2D array of brain region names for each pixel",
             "default": None,
         },
         {
             "name": "brain_region_id",
-            "type": (list, type(None)),
+            "type": ("array_data", "data"),
             "doc": "2D array of brain region IDs for each pixel (corresponding to atlas ontology)",
             "default": None,
         },
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
-        image = kwargs.pop("image")
-        imaging_plane = kwargs.pop("imaging_plane")
+        image = kwargs.get("image")
+        imaging_plane = kwargs.get("imaging_plane")
         if image is None and imaging_plane is None:
             raise ValueError('"image" or "imaging_plane" must be provided in AnatomicalCoordinatesImage.__init__ ')
+        if image is not None:
+            x = kwargs.get("x")
+            y = kwargs.get("y")
+            z = kwargs.get("z")
+            # verify that x, y, z have the same shape as the image data
+            if x.shape != image.data.shape or y.shape != image.data.shape or z.shape != image.data.shape:
+                raise ValueError(
+                    f'"x", "y", and "z" must have the same shape as the image data. '
+                    f"x.shape: {x.shape}, y.shape: {y.shape}, z.shape: {z.shape}, "
+                    f"image.data.shape: {image.data.shape}"
+                )
         super().__init__(**kwargs)

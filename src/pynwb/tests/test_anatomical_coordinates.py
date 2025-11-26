@@ -1,14 +1,15 @@
 """Unit and integration tests for the new neurodata type."""
 
 from pynwb import NWBHDF5IO
+from pynwb.base import Images
+from pynwb.image import GrayscaleImage
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing.mock.ecephys import mock_ElectrodeTable
 from pynwb.testing.mock.ophys import mock_ImagingPlane
 import numpy as np
 import numpy.testing as npt
 
-from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Localization
-from src.pynwb.ndx_anatomical_localization.ndx_anatomical_localization import AnatomicalCoordinatesImage
+from ndx_anatomical_localization import AnatomicalCoordinatesImage, AnatomicalCoordinatesTable, Space, Localization
 
 
 def test_create_custom_space():
@@ -67,7 +68,7 @@ def test_create_anatomical_coordinates_table():
         npt.assert_array_equal(read_coordinates_table["localized_entity"].data[:], np.array([0, 1, 2, 3, 4]))
 
 
-def test_create_anatomical_coordinates_image():
+def test_create_anatomical_coordinates_image_w_imaging_plane():
 
     nwbfile = mock_NWBFile()
 
@@ -84,20 +85,20 @@ def test_create_anatomical_coordinates_image():
         imaging_plane=imaging_plane,
         method="method",
         space=space,
-        x=[1.0, 1.0, 1.0, 1.0, 1.0],
-        y=[2.0, 2.0, 2.0, 2.0, 2.0],
-        z=[3.0, 3.0, 3.0, 3.0, 3.0],
-        brain_region=["CA1", "CA1", "CA1", "CA1", "CA1"],
+        x=np.ones((5, 5)),
+        y=np.ones((5, 5)) * 2.0,
+        z=np.ones((5, 5)) * 3.0,
+        brain_region=np.array([["CA1"] * 5] * 5),
     )
 
-    localization.add_anatomical_coordinates_image([image_coordinates])
+    localization.add_anatomical_coordinates_images([image_coordinates])
 
     with NWBHDF5IO("test_image.nwb", "w") as io:
         io.write(nwbfile)
 
     with NWBHDF5IO("test_image.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
-        read_imaging_plane = read_nwbfile.imaging_planes["MyImagingPlane"]
+        read_imaging_plane = read_nwbfile.imaging_planes["ImagingPlane"]
         read_localization = read_nwbfile.lab_meta_data["localization"]
 
         read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
@@ -105,9 +106,141 @@ def test_create_anatomical_coordinates_image():
         assert read_coordinates_image.method == "method"
         assert read_coordinates_image.imaging_plane is read_imaging_plane
         assert read_coordinates_image.space.fields == Space.get_predefined_space("CCFv3").fields
-        npt.assert_array_equal(read_coordinates_image["x"].data[:], np.array([1.0, 1.0, 1.0, 1.0, 1.0]))
-        npt.assert_array_equal(read_coordinates_image["y"].data[:], np.array([2.0, 2.0, 2.0, 2.0, 2.0]))
-        npt.assert_array_equal(read_coordinates_image["z"].data[:], np.array([3.0, 3.0, 3.0, 3.0, 3.0]))
         npt.assert_array_equal(
-            read_coordinates_image["brain_region"].data[:], np.array(["CA1", "CA1", "CA1", "CA1", "CA1"])
+            read_coordinates_image.x[:],
+            np.ones((5, 5)),
+        )
+        npt.assert_array_equal(
+            read_coordinates_image.y[:],
+            np.ones((5, 5)) * 2.0,
+        )
+        npt.assert_array_equal(
+            read_coordinates_image.z[:],
+            np.ones((5, 5)) * 3.0,
+        )
+        npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
+
+
+def test_create_anatomical_coordinates_image_w_image():
+
+    nwbfile = mock_NWBFile()
+
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    if "ophys" not in nwbfile.processing:
+        nwbfile.create_processing_module("ophys", "ophys")
+
+    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="Summary images container"))
+    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+    image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
+
+    space = Space.get_predefined_space("CCFv3")
+    localization.add_spaces([space])
+
+    image_coordinates = AnatomicalCoordinatesImage(
+        name="MyAnatomicalLocalization",
+        image=image_collection["MyImage"],
+        method="method",
+        space=space,
+        x=np.ones((5, 5)),
+        y=np.ones((5, 5)) * 2.0,
+        z=np.ones((5, 5)) * 3.0,
+        brain_region=np.array([["CA1"] * 5] * 5),
+    )
+
+    localization.add_anatomical_coordinates_images([image_coordinates])
+
+    with NWBHDF5IO("test_image.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO("test_image.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_summary_image = read_nwbfile.processing["ophys"]["SummaryImages"]["MyImage"]
+        read_localization = read_nwbfile.lab_meta_data["localization"]
+
+        read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
+
+        assert read_coordinates_image.method == "method"
+        assert read_coordinates_image.image is read_summary_image
+        assert read_coordinates_image.space.fields == Space.get_predefined_space("CCFv3").fields
+        npt.assert_array_equal(
+            read_coordinates_image.x[:],
+            np.ones((5, 5)),
+        )
+        npt.assert_array_equal(
+            read_coordinates_image.y[:],
+            np.ones((5, 5)) * 2.0,
+        )
+        npt.assert_array_equal(
+            read_coordinates_image.z[:],
+            np.ones((5, 5)) * 3.0,
+        )
+        npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
+
+
+def test_create_anatomical_coordinates_image_failing_no_image_or_plane():
+    """
+    No image or imaging_plane provided should raise ValueError
+    """
+
+    nwbfile = mock_NWBFile()
+
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    space = Space.get_predefined_space("CCFv3")
+    localization.add_spaces([space])
+    try:
+        image_coordinates = AnatomicalCoordinatesImage(
+            name="MyAnatomicalLocalization",
+            method="method",
+            space=space,
+            x=np.ones((5, 5)),
+            y=np.ones((5, 5)) * 2.0,
+            z=np.ones((5, 5)) * 3.0,
+            brain_region=np.array([["CA1"] * 5] * 5),
+        )
+    except ValueError as e:
+        assert str(e) == '"image" or "imaging_plane" must be provided in AnatomicalCoordinatesImage.__init__ '
+
+
+def test_create_anatomical_coordinates_image_failing_shape_mismatch():
+    """
+    Mismatched shape between image and x,y,z should raise ValueError
+    """
+
+    nwbfile = mock_NWBFile()
+
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    space = Space.get_predefined_space("CCFv3")
+    localization.add_spaces([space])
+
+    if "ophys" not in nwbfile.processing:
+        nwbfile.create_processing_module("ophys", "ophys")
+
+    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="Summary images container"))
+    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+    image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
+    x = np.ones((4, 5))
+    y = np.ones((5, 5)) * 2.0
+    z = np.ones((5, 5)) * 3.0
+    try:
+        image_coordinates = AnatomicalCoordinatesImage(
+            name="MyAnatomicalLocalization",
+            image=image_collection["MyImage"],
+            method="method",
+            space=space,
+            x=np.ones((4, 5)),
+            y=np.ones((5, 5)) * 2.0,
+            z=np.ones((5, 5)) * 3.0,
+            brain_region=np.array([["CA1"] * 5] * 5),
+        )
+    except ValueError as e:
+        assert str(e) == (
+            f'"x", "y", and "z" must have the same shape as the image data. '
+            f"x.shape: {x.shape}, y.shape: {y.shape}, z.shape: {z.shape}, "
+            f"image.data.shape: {image_collection['MyImage'].data.shape}"
         )
