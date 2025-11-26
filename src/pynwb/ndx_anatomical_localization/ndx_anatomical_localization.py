@@ -1,10 +1,9 @@
 from hdmf.common import DynamicTable
-from numpy import ndarray
 from pynwb.image import Image
 from pynwb.ophys import ImagingPlane
 from hdmf.utils import get_docval, AllowPositional
 
-from pynwb import get_class, register_class, docval, register_map
+from pynwb import get_class, register_class, docval
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
@@ -89,7 +88,8 @@ class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
         columns = kwargs.get("columns")
         target = kwargs.pop("target")
         if not columns or "localized_entity" not in [c.name for c in columns]:
-            # set the target table of the "localized_entity" column only if the "localized_entity" column is not in "columns"
+            # set the target table of the "localized_entity" column only if
+            # the "localized_entity" column is not in "columns"
             if target is None:
                 raise ValueError(
                     '"target" (the target table that contains the objects that have these coordinates) '

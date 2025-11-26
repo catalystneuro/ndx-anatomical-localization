@@ -13,7 +13,7 @@ from ndx_anatomical_localization import AnatomicalCoordinatesImage, AnatomicalCo
 
 
 def test_create_custom_space():
-    space = Space(
+    _ = Space(
         name="MySpace",
         space_name="MySpace",
         origin="bregma",
@@ -192,7 +192,7 @@ def test_create_anatomical_coordinates_image_failing_no_image_or_plane():
     space = Space.get_predefined_space("CCFv3")
     localization.add_spaces([space])
     try:
-        image_coordinates = AnatomicalCoordinatesImage(
+        _ = AnatomicalCoordinatesImage(
             name="MyAnatomicalLocalization",
             method="method",
             space=space,
@@ -228,7 +228,7 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
     y = np.ones((5, 5)) * 2.0
     z = np.ones((5, 5)) * 3.0
     try:
-        image_coordinates = AnatomicalCoordinatesImage(
+        _ = AnatomicalCoordinatesImage(
             name="MyAnatomicalLocalization",
             image=image_collection["MyImage"],
             method="method",
@@ -238,6 +238,7 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
             z=np.ones((5, 5)) * 3.0,
             brain_region=np.array([["CA1"] * 5] * 5),
         )
+
     except ValueError as e:
         assert str(e) == (
             f'"x", "y", and "z" must have the same shape as the image data. '
