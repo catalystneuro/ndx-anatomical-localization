@@ -94,6 +94,10 @@ groups:
         doc: "The method used to determine the coordinates"
         dtype: text
         required: true
+      - name: description
+        doc: "A description of the anatomical coordinates image"
+        dtype: text
+        required: false
     datasets:
       - name: x
         dtype: float32
