@@ -52,6 +52,16 @@ The "localized_entity" attribute is a reference to the object that is localized 
 x, y, and z columns store the coordinates of the objects in the given space and brain_region allows you to optionally also store the localized brain region.
 You can also add custom columns to this table, for example to express certainty or quality of the localization.
 
+### AnatomicalCoordinatesImage
+For imaging data, you can use `AnatomicalCoordinatesImage` to store anatomical coordinates as 2D arrays that map pixels in an image to anatomical locations.
+This is useful when you want to localize a field of view or register imaging data to a reference atlas.
+
+Each `AnatomicalCoordinatesImage` must be associated with either:
+- An `ImagingPlane` object (for optical physiology experiments)
+- An `Image` object (for static reference images)
+
+The x, y, and z datasets store 2D arrays of coordinates for each pixel in the image, and you can optionally include brain_region information.
+
 ### Localization
 The `Localization` object is used to store the spaces and anatomical coordinates tables in the /general section of the NWB file.
 Within `Localization`, you can create multiple `Space` and `AnatomicalCoordinatesTable` objects to store localizations of different entities or localizations of the same entity using different methods or spaces.
@@ -83,6 +93,79 @@ table = AnatomicalCoordinatesTable(
 [table.add_row(x=1.0, y=2.0, z=3.0, brain_region="CA1", localized_entity=x) for x in range(5)]
 
 localization.add_anatomical_coordinates_tables([table])
+```
+
+#### Example with ImagingPlane
+
+```python
+from pynwb.testing.mock.file import mock_NWBFile
+from pynwb.testing.mock.ophys import mock_ImagingPlane
+import numpy as np
+
+from ndx_anatomical_localization import AnatomicalCoordinatesImage, Space, Localization
+
+nwbfile = mock_NWBFile()
+
+localization = Localization()
+nwbfile.add_lab_meta_data([localization])
+
+imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
+
+space = Space.get_predefined_space("CCFv3")
+localization.add_spaces([space])
+
+image_coordinates = AnatomicalCoordinatesImage(
+    name="MyAnatomicalLocalization",
+    imaging_plane=imaging_plane,
+    method="manual registration",
+    space=space,
+    x=np.ones((5, 5)),
+    y=np.ones((5, 5)) * 2.0,
+    z=np.ones((5, 5)) * 3.0,
+    brain_region=np.array([["CA1"] * 5] * 5),
+)
+
+localization.add_anatomical_coordinates_images([image_coordinates])
+```
+
+#### Example with Image
+
+```python
+from pynwb.testing.mock.file import mock_NWBFile
+from pynwb.base import Images
+from pynwb.image import GrayscaleImage
+import numpy as np
+
+from ndx_anatomical_localization import AnatomicalCoordinatesImage, Space, Localization
+
+nwbfile = mock_NWBFile()
+
+localization = Localization()
+nwbfile.add_lab_meta_data([localization])
+
+# Create an image to localize
+if "ophys" not in nwbfile.processing:
+    nwbfile.create_processing_module("ophys", "ophys")
+
+nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="Summary images container"))
+image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
+
+space = Space.get_predefined_space("CCFv3")
+localization.add_spaces([space])
+
+image_coordinates = AnatomicalCoordinatesImage(
+    name="MyAnatomicalLocalization",
+    image=image_collection["MyImage"],
+    method="manual registration",
+    space=space,
+    x=np.ones((5, 5)),
+    y=np.ones((5, 5)) * 2.0,
+    z=np.ones((5, 5)) * 3.0,
+    brain_region=np.array([["CA1"] * 5] * 5),
+)
+
+localization.add_anatomical_coordinates_images([image_coordinates])
 ```
 
 ---
