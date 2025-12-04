@@ -1,7 +1,7 @@
 from hdmf.common import DynamicTable
 from pynwb.image import Image
 from pynwb.ophys import ImagingPlane
-from hdmf.utils import get_docval, AllowPositional, popargs
+from hdmf.utils import get_docval, AllowPositional
 
 from pynwb import get_class, register_class, docval
 
