@@ -148,6 +148,10 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
     def __init__(self, **kwargs):
         image = kwargs.get("image")
         imaging_plane = kwargs.get("imaging_plane")
+        if image is not None and imaging_plane is not None:
+            raise ValueError(
+                'Only one of "image" or "imaging_plane" can be provided in AnatomicalCoordinatesImage.__init__ '
+            )
         if image is None and imaging_plane is None:
             raise ValueError('"image" or "imaging_plane" must be provided in AnatomicalCoordinatesImage.__init__ ')
         if image is not None:

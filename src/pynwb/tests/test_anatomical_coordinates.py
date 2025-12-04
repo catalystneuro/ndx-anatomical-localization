@@ -245,3 +245,35 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
             f"x.shape: {x.shape}, y.shape: {y.shape}, z.shape: {z.shape}, "
             f"image.data.shape: {image_collection['MyImage'].data.shape}"
         )
+
+
+def test_create_anatomical_coordinates_image_failing_both_image_and_plane():
+    """
+    Both image and imaging_plane provided should raise ValueError
+    """
+
+    nwbfile = mock_NWBFile()
+
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
+
+    space = Space.get_predefined_space("CCFv3")
+    localization.add_spaces([space])
+    try:
+        _ = AnatomicalCoordinatesImage(
+            name="MyAnatomicalLocalization",
+            imaging_plane=imaging_plane,
+            image=None,
+            method="method",
+            space=space,
+            x=np.ones((5, 5)),
+            y=np.ones((5, 5)) * 2.0,
+            z=np.ones((5, 5)) * 3.0,
+            brain_region=np.array([["CA1"] * 5] * 5),
+        )
+    except ValueError as e:
+        assert (
+            str(e) == 'Only one of "image" or "imaging_plane" can be provided in AnatomicalCoordinatesImage.__init__ '
+        )
