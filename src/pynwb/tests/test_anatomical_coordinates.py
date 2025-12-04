@@ -277,3 +277,41 @@ def test_create_anatomical_coordinates_image_failing_both_image_and_plane():
         assert (
             str(e) == 'Only one of "image" or "imaging_plane" can be provided in AnatomicalCoordinatesImage.__init__ '
         )
+
+
+def test_get_coordinates():
+
+    nwbfile = mock_NWBFile()
+
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
+
+    space = Space.get_predefined_space("CCFv3")
+    localization.add_spaces([space])
+
+    x_data = np.array([[0, 1, 2], [3, 4, 5], [6, 7, 8]])
+    y_data = np.array([[10, 11, 12], [13, 14, 15], [16, 17, 18]])
+    z_data = np.array([[20, 21, 22], [23, 24, 25], [26, 27, 28]])
+
+    coords = AnatomicalCoordinatesImage(
+        name="TestCoordinates",
+        imaging_plane=imaging_plane,
+        method="test_method",
+        space=space,
+        x=x_data,
+        y=y_data,
+        z=z_data,
+    )
+
+    # Test retrieving coordinates for specific pixel
+    i, j = 1, 2
+    coord = coords.get_coordinates(i=i, j=j)
+    expected_coord = (x_data[i, j], y_data[i, j], z_data[i, j])
+    npt.assert_array_equal(coord, expected_coord)
+
+    # Test retrieving all coordinates
+    all_coords = coords.get_coordinates()
+    expected_all_coords = np.stack([x_data, y_data, z_data], axis=-1)
+    npt.assert_array_equal(all_coords, expected_all_coords)

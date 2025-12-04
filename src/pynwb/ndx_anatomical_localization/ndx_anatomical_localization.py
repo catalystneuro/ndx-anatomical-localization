@@ -1,7 +1,7 @@
 from hdmf.common import DynamicTable
 from pynwb.image import Image
 from pynwb.ophys import ImagingPlane
-from hdmf.utils import get_docval, AllowPositional
+from hdmf.utils import get_docval, AllowPositional, popargs
 
 from pynwb import get_class, register_class, docval
 
@@ -148,6 +148,10 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
     def __init__(self, **kwargs):
         image = kwargs.get("image")
         imaging_plane = kwargs.get("imaging_plane")
+
+        x = kwargs["x"]
+        y = kwargs["y"]
+        z = kwargs["z"]
         if image is not None and imaging_plane is not None:
             raise ValueError(
                 'Only one of "image" or "imaging_plane" can be provided in AnatomicalCoordinatesImage.__init__ '
@@ -155,9 +159,6 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
         if image is None and imaging_plane is None:
             raise ValueError('"image" or "imaging_plane" must be provided in AnatomicalCoordinatesImage.__init__ ')
         if image is not None:
-            x = kwargs.get("x")
-            y = kwargs.get("y")
-            z = kwargs.get("z")
             # verify that x, y, z have the same shape as the image data
             if x.shape != image.data.shape or y.shape != image.data.shape or z.shape != image.data.shape:
                 raise ValueError(
@@ -166,3 +167,21 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
                     f"image.data.shape: {image.data.shape}"
                 )
         super().__init__(**kwargs)
+
+    def get_coordinates(self, i=None, j=None):
+        """Get the anatomical coordinates at a specific pixel or for the entire image.
+
+        Args:
+            i (int, optional): The row index of the pixel. Defaults to None.
+            j (int, optional): The column index of the pixel. Defaults to None.
+        Returns:
+            tuple or np.ndarray: The anatomical coordinates at the specified pixel (i, j) as a tuple,
+            or the entire coordinate arrays stacked along the last axis if i and j are not provided.
+        """
+
+        import numpy as np
+
+        if i is not None and j is not None:
+            return (self.x[i, j], self.y[i, j], self.z[i, j])
+        else:
+            return np.stack([self.x[:], self.y[:], self.z[:]], axis=-1)

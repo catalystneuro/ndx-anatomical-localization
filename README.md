@@ -60,7 +60,32 @@ Each `AnatomicalCoordinatesImage` must be associated with either:
 - An `ImagingPlane` object (for optical physiology experiments)
 - An `Image` object (for static reference images)
 
-The x, y, and z datasets store 2D arrays of coordinates for each pixel in the image, and you can optionally include brain_region information.
+The x, y, and z datasets store 2D arrays of coordinates for each pixel in the image, x[i, j], y[i, j], z[i, j] give the anatomical coordinates location for pixel (i, j).
+The `get_coordinates()` function return the image with anatomical coordinates per pixel:
+
+                       j=0             j=1             j=2
+                    ──────────────────────────────────────────────
+                  │               │               │               │
+         i=0      │   x: 2.10     │   x: 2.11     │   x: 2.12     │
+                  │   y: -3.40    │   y: -3.40    │   y: -3.40    │
+                  │   z: 1.20     │   z: 1.20     │   z: 1.20     │
+                  │               │               │               │
+                  ├───────────────┼───────────────┼───────────────┤
+                  │               │               │               │
+         i=1      │   x: 2.10     │   x: 2.11     │   x: 2.12     │
+                  │   y: -3.41    │   y: -3.41    │   y: -3.41    │
+                  │   z: 1.20     │   z: 1.20     │   z: 1.20     │
+                  │               │               │               │
+                  ├───────────────┼───────────────┼───────────────┤
+                  │               │               │               │
+         i=2      │   x: 2.10     │   x: 2.11     │   x: 2.12     │
+                  │   y: -3.42    │   y: -3.42    │   y: -3.42    │
+                  │   z: 1.20     │   z: 1.20     │   z: 1.20     │
+                  │               │               │               │
+                   ───────────────────────────────────────────────
+
+Each pixel stores its anatomical coordinates (x, y, z)
+
 
 ### Localization
 The `Localization` object is used to store the spaces and anatomical coordinates tables in the /general section of the NWB file.
