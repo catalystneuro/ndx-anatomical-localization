@@ -9,7 +9,7 @@ from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Allen
 
 
 def test_create_custom_space():
-    space = Space(
+    Space(
         name="MySpace",
         space_name="MySpace",
         origin="bregma",
@@ -58,7 +58,8 @@ def test_create_anatomical_coordinates_table():
         npt.assert_array_equal(read_coordinates_table["x"].data[:], np.array([1.0, 1.0, 1.0, 1.0, 1.0]))
         npt.assert_array_equal(read_coordinates_table["y"].data[:], np.array([2.0, 2.0, 2.0, 2.0, 2.0]))
         npt.assert_array_equal(read_coordinates_table["z"].data[:], np.array([3.0, 3.0, 3.0, 3.0, 3.0]))
-        npt.assert_array_equal(read_coordinates_table["brain_region"].data[:], np.array(["CA1", "CA1", "CA1", "CA1", "CA1"]))
+        expected_regions = np.array(["CA1", "CA1", "CA1", "CA1", "CA1"])
+        npt.assert_array_equal(read_coordinates_table["brain_region"].data[:], expected_regions)
         npt.assert_array_equal(read_coordinates_table["localized_entity"].data[:], np.array([0, 1, 2, 3, 4]))
 
 

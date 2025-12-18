@@ -1,7 +1,7 @@
 from hdmf.common import DynamicTable
 from hdmf.utils import get_docval, AllowPositional
 
-from pynwb import get_class, register_class, docval, register_map
+from pynwb import get_class, register_class, docval
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
 TempAllenCCFv3Space = get_class("AllenCCFv3Space", "ndx-anatomical-localization")
