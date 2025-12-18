@@ -1,21 +1,12 @@
 from hdmf.common import DynamicTable
 from hdmf.utils import get_docval, AllowPositional
 
-from pynwb import get_class, register_class, docval, register_map
+from pynwb import get_class, register_class, docval
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
+TempAllenCCFv3Space = get_class("AllenCCFv3Space", "ndx-anatomical-localization")
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 Localization = get_class("Localization", "ndx-anatomical-localization")
-
-PREDEFINED_SPACES = {
-    "CCFv3": {
-        "name": "space",
-        "space_name": "CCFv3",
-        "origin": "In the middle of the anterior commissure",
-        "units": "um",
-        "orientation": "RAS",
-    }
-}
 
 
 @register_class("Space", "ndx-anatomical-localization")
@@ -56,19 +47,37 @@ class Space(TempSpace):
 
         super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
 
-    @classmethod
-    def get_predefined_space(cls, space_name):
-        if space_name in PREDEFINED_SPACES:
-            return cls(**PREDEFINED_SPACES[space_name])
-        else:
-            raise ValueError(f"Space {space_name} is not predefined")
+
+@register_class("AllenCCFv3Space", "ndx-anatomical-localization")
+class AllenCCFv3Space(TempAllenCCFv3Space):
+    """
+    The Allen Mouse Brain Common Coordinate Framework version 3 (2020).
+
+    This canonical space represents the CCFv3 atlas with fixed orientation and origin.
+    Uses ASL orientation (x=anterior-posterior, y=superior-inferior/dorsal-ventral, z=left-right)
+    with 10 micrometer resolution. The origin (0,0,0) is at the dorsal-left-posterior corner
+    of the 3D image volume.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "AllenCCFv3"},
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, name="AllenCCFv3"):
+        super().__init__(
+            name=name,
+            space_name="AllenCCFv3",
+            origin="Dorsal-left-posterior corner of the 3D image volume",
+            units="um",
+            orientation="ASL",
+        )
 
 
 @register_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
 
     @docval(
-        {"name": "space", "type": Space, "doc": "space of the table"},
+        {"name": "space", "type": (Space, "AllenCCFv3Space"), "doc": "space of the table"},
         {"name": "method", "type": str, "doc": "method of the table"},
         {"name": "target", "type": DynamicTable,
          "doc": 'target table. ignored if a "localized_entity" column is provided in "columns"', "default": None},
@@ -79,7 +88,7 @@ class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
         columns = kwargs.get("columns")
         target = kwargs.pop("target")
         if not columns or "localized_entity" not in [c.name for c in columns]:
-            # set the target table of the "localized_entity" column only if the "localized_entity" column is not in "columns"
+            # set target table of "localized_entity" column only if not already in "columns"
             if target is None:
                 raise ValueError(
                     '"target" (the target table that contains the objects that have these coordinates) '
