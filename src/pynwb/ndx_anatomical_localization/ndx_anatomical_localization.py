@@ -88,7 +88,7 @@ class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
         columns = kwargs.get("columns")
         target = kwargs.pop("target")
         if not columns or "localized_entity" not in [c.name for c in columns]:
-            # set the target table of the "localized_entity" column only if the "localized_entity" column is not in "columns"
+            # set target table of "localized_entity" column only if not already in "columns"
             if target is None:
                 raise ValueError(
                     '"target" (the target table that contains the objects that have these coordinates) '
