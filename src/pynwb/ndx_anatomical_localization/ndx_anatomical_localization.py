@@ -28,11 +28,13 @@ class Space(TempSpace):
         {
             "name": "orientation",
             "type": str,
-            "doc": """A 3-letter string indicating the positive direction along each axis. One of A,P,L,R,S,I
-          for each of x, y, and z. For example, 'RAS' means the positive x direction is Right, positive y
-          is Anterior, and positive z is Superior (dorsal). Note: this convention specifies positive
-          directions, not origin location (use the 'origin' field to describe where (0,0,0) is located).
-          For dorsal/ventral use 'S/I' (superior/inferior).""",
+            "doc": """A 3-letter string indicating the positive direction along each axis, where the 1st letter
+          is for x, 2nd for y, and 3rd for z. Each letter can be: A (Anterior), P (Posterior), L (Left),
+          R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three
+          anatomical dimensions (one from A/P, one from L/R, one from S/I). For example, 'RAS' means
+          positive x is Right, positive y is Anterior, positive z is Superior. This convention specifies
+          positive directions (sometimes written as 'RAS+'), not origin location - use the 'origin' field
+          to describe where (0,0,0) is located.""",
         },
         allow_positional=AllowPositional.ERROR,
     )
@@ -56,7 +58,7 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
 
     This canonical space represents the CCFv3 atlas with fixed orientation and origin.
     Uses PIR orientation (positive x=Posterior, positive y=Inferior, positive z=Right)
-    with 10 micrometer resolution. The origin (0,0,0) is at the anterior-superior-left
+    with 10 micrometer resolution. The origin (0,0,0) is at the Anterior-Superior-Left (ASL)
     corner of the 3D image volume.
     """
 
@@ -68,7 +70,7 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
         super().__init__(
             name=name,
             space_name="AllenCCFv3",
-            origin="Anterior-superior-left corner of the 3D image volume",
+            origin="Anterior-Superior-Left (ASL) corner of the 3D image volume",
             units="um",
             orientation="PIR",
         )

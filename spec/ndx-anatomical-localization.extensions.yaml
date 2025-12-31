@@ -27,11 +27,13 @@ groups:
         dtype: text
         required: true
       - name: orientation
-        doc: "A 3-letter string indicating the positive direction along each axis. One of A,P,L,R,S,I
-          for each of x, y, and z. For example, 'RAS' means the positive x direction is Right, positive y
-          is Anterior, and positive z is Superior (dorsal). Note: this convention specifies positive
-          directions, not origin location (use the 'origin' field to describe where (0,0,0) is located).
-          For dorsal/ventral use 'S/I' (superior/inferior)."
+        doc: "A 3-letter string indicating the positive direction along each axis, where the 1st letter
+          is for x, 2nd for y, and 3rd for z. Each letter can be: A (Anterior), P (Posterior), L (Left),
+          R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three
+          anatomical dimensions (one from A/P, one from L/R, one from S/I). For example, 'RAS' means
+          positive x is Right, positive y is Anterior, positive z is Superior. This convention specifies
+          positive directions (sometimes written as 'RAS+'), not origin location - use the 'origin' field
+          to describe where (0,0,0) is located."
         dtype: text
         required: true
   - neurodata_type_def: AllenCCFv3Space
@@ -46,7 +48,7 @@ groups:
         doc: "Name of the space (fixed to AllenCCFv3)"
       - name: origin
         dtype: text
-        value: Anterior-superior-left corner of the 3D image volume
+        value: Anterior-Superior-Left (ASL) corner of the 3D image volume
         doc: "Origin of the coordinate system (fixed)"
       - name: units
         dtype: text

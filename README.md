@@ -21,7 +21,11 @@ Each Space object has the following attributes:
   * `space_name`: The name of the space (e.g. "AllenCCFv3")
   * `origin`: The origin of the space (e.g. "bregma" or "Dorsal-left-posterior corner of the 3D image volume")
   * `units`: The units of the space (e.g. "um")
-  * `orientation`: A 3-letter string indicating the positive direction along each axis. Uses A (Anterior), P (Posterior), L (Left), R (Right), S (Superior), I (Inferior) for x, y, and z respectively. For example, "RAS" means positive x is Right, positive y is Anterior, positive z is Superior. Note: this specifies positive directions, not origin location (use `origin` for that).
+  * `orientation`: A 3-letter string indicating the positive direction along each axis, where the 1st letter is for x, the 2nd for y, and the 3rd for z. Each letter can be one of: A (Anterior), P (Posterior), L (Left), R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three anatomical dimensions (one from A/P, one from L/R, one from S/I). For example:
+    - "RAS" means positive x is Right, positive y is Anterior, positive z is Superior
+    - "PIR" means positive x is Posterior, positive y is Inferior, positive z is Right
+
+    **Important**: This convention specifies *positive directions*, not origin location. This is sometimes written as "RAS+" (with a plus sign) to make this explicit. Some tools (e.g., [BrainGlobe](https://brainglobe.info/documentation/setting-up/image-definition.html#orientation)) use a similar three-letter code to indicate where the origin is located instead - for example, "RAS" in that convention would mean the origin is at the Right-Anterior-Superior corner, which is equivalent to "LPI+" in the positive-direction convention. We use the positive-direction convention here; use the `origin` field to describe where (0,0,0) is located.
 
 You can define a custom space by creating a `Space` object with the desired attributes:
 
@@ -43,7 +47,7 @@ The Allen Institute CCFv3 atlas is available as a canonical space class `AllenCC
 - **Orientation**: PIR (positive x=Posterior, positive y=Inferior, positive z=Right)
 - **Units**: micrometers (um)
 - **Resolution**: 10 micrometers isotropic
-- **Origin**: Anterior-superior-left corner of the 3D image volume
+- **Origin**: Anterior-Superior-Left (ASL) corner of the 3D image volume
 - **Dimensions**: 1320 x 800 x 1140 voxels
 
 You can create this canonical space directly:
