@@ -25,7 +25,9 @@ Each Space object has the following attributes:
     - "RAS" means positive x is Right, positive y is Anterior, positive z is Superior
     - "PIR" means positive x is Posterior, positive y is Inferior, positive z is Right
 
-    **Important**: This convention specifies *positive directions*, not origin location. This is sometimes written as "RAS+" (with a plus sign) to make this explicit. Some tools (e.g., [BrainGlobe](https://brainglobe.info/documentation/setting-up/image-definition.html#orientation)) use a similar three-letter code to indicate where the origin is located instead - for example, "RAS" in that convention would mean the origin is at the Right-Anterior-Superior corner, which is equivalent to "LPI+" in the positive-direction convention. We use the positive-direction convention here; use the `origin` field to describe where (0,0,0) is located.
+    **Notes**:
+    - The three anatomical dimensions are also commonly referred to as AP (Anterior-Posterior), ML (Medial-Lateral), and DV (Dorsal-Ventral).
+    - This convention specifies *positive directions*, not origin location. This is sometimes written as "RAS+" (with a plus sign) to make this explicit. Some tools (e.g., [BrainGlobe](https://brainglobe.info/documentation/setting-up/image-definition.html#orientation)) use a similar three-letter code to indicate where the origin is located instead - for example, "RAS" in that convention would mean the origin is at the Right-Anterior-Superior corner, which is equivalent to "LPI+" in the positive-direction convention. We use the positive-direction convention here; use the `origin` field to describe where (0,0,0) is located.
 
 You can define a custom space by creating a `Space` object with the desired attributes:
 

@@ -32,9 +32,12 @@ class Space(TempSpace):
           is for x, 2nd for y, and 3rd for z. Each letter can be: A (Anterior), P (Posterior), L (Left),
           R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three
           anatomical dimensions (one from A/P, one from L/R, one from S/I). For example, 'RAS' means
-          positive x is Right, positive y is Anterior, positive z is Superior. This convention specifies
-          positive directions (sometimes written as 'RAS+'), not origin location - use the 'origin' field
-          to describe where (0,0,0) is located.""",
+          positive x is Right, positive y is Anterior, positive z is Superior.
+
+          Notes:
+          - These three dimensions are also commonly referred to as AP, ML, and DV.
+          - This convention specifies positive directions (sometimes written as 'RAS+'), not origin
+            location - use the 'origin' field to describe where (0,0,0) is located.""",
         },
         allow_positional=AllowPositional.ERROR,
     )
