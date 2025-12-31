@@ -21,7 +21,7 @@ Each Space object has the following attributes:
   * `space_name`: The name of the space (e.g. "AllenCCFv3")
   * `origin`: The origin of the space (e.g. "bregma" or "Dorsal-left-posterior corner of the 3D image volume")
   * `units`: The units of the space (e.g. "um")
-  * `orientation`: A 3-letter string using A (Anterior), P (Posterior), L (Left), R (Right), S (Superior), I (Inferior) for each of x, y, and z axes (e.g. "RAS" or "ASL").
+  * `orientation`: A 3-letter string indicating the positive direction along each axis. Uses A (Anterior), P (Posterior), L (Left), R (Right), S (Superior), I (Inferior) for x, y, and z respectively. For example, "RAS" means positive x is Right, positive y is Anterior, positive z is Superior. Note: this specifies positive directions, not origin location (use `origin` for that).
 
 You can define a custom space by creating a `Space` object with the desired attributes:
 
@@ -40,10 +40,10 @@ space = Space(
 #### Allen Mouse Brain Common Coordinate Framework v3 (CCFv3)
 
 The Allen Institute CCFv3 atlas is available as a canonical space class `AllenCCFv3Space` with fixed orientation and origin parameters:
-- **Orientation**: ASL (x=Anterior-Posterior, y=Superior-Inferior/Dorsal-Ventral, z=Left-Right)
+- **Orientation**: PIR (positive x=Posterior, positive y=Inferior, positive z=Right)
 - **Units**: micrometers (um)
 - **Resolution**: 10 micrometers isotropic
-- **Origin**: Dorsal-left-posterior corner of the 3D image volume
+- **Origin**: Anterior-superior-left corner of the 3D image volume
 - **Dimensions**: 1320 x 800 x 1140 voxels
 
 You can create this canonical space directly:

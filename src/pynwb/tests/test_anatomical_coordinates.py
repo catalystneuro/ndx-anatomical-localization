@@ -69,9 +69,9 @@ def test_create_allen_ccfv3_space():
 
     assert space.name == "AllenCCFv3"
     assert space.space_name == "AllenCCFv3"
-    assert space.orientation == "ASL"
+    assert space.orientation == "PIR"
     assert space.units == "um"
-    assert space.origin == "Dorsal-left-posterior corner of the 3D image volume"
+    assert space.origin == "Anterior-superior-left corner of the 3D image volume"
 
 
 def test_create_allen_ccfv3_space_custom_name():
@@ -80,7 +80,7 @@ def test_create_allen_ccfv3_space_custom_name():
 
     assert space.name == "my_ccf_space"
     assert space.space_name == "AllenCCFv3"
-    assert space.orientation == "ASL"
+    assert space.orientation == "PIR"
 
 
 def test_allen_ccfv3_space_write_read():
@@ -116,5 +116,5 @@ def test_allen_ccfv3_space_write_read():
         # Verify that the space is still an AllenCCFv3Space instance
         assert isinstance(read_table.space, AllenCCFv3Space)
         assert read_table.space.space_name == "AllenCCFv3"
-        assert read_table.space.orientation == "ASL"
-        assert read_table.space.origin == "Dorsal-left-posterior corner of the 3D image volume"
+        assert read_table.space.orientation == "PIR"
+        assert read_table.space.origin == "Anterior-superior-left corner of the 3D image volume"
