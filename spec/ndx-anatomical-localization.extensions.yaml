@@ -37,6 +37,17 @@ groups:
           to describe where (0,0,0) is located."
         dtype: text
         required: true
+    datasets:
+      - name: extent
+        doc: "The spatial extent (bounding box dimensions) of the coordinate space as [x, y, z].
+          For corner-origin spaces like Allen CCF, this specifies the atlas dimensions.
+          Units match the 'units' attribute. Optional - may be None for landmark-centered atlases."
+        dtype: float64
+        dims:
+          - num_dimensions
+        shape:
+          - 3
+        quantity: "?"
   - neurodata_type_def: AllenCCFv3Space
     neurodata_type_inc: Space
     doc: "The Allen Mouse Brain Common Coordinate Framework version 3 (2020). This canonical space uses PIR orientation
@@ -59,6 +70,15 @@ groups:
         dtype: text
         value: PIR
         doc: "Orientation of the coordinate system (fixed to PIR, indicating positive axis directions)"
+    datasets:
+      - name: extent
+        dtype: float64
+        dims:
+          - num_dimensions
+        shape:
+          - 3
+        value: [13200.0, 8000.0, 11400.0]
+        doc: "Atlas extent in micrometers: [AP=13200, DV=8000, ML=11400]"
   - neurodata_type_def: AnatomicalCoordinatesTable
     neurodata_type_inc: DynamicTable
     doc: "A table for storing anatomical coordinates for rows of another table determined using a single method"

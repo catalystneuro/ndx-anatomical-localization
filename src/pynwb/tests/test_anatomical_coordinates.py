@@ -72,6 +72,8 @@ def test_create_allen_ccfv3_space():
     assert space.orientation == "PIR"
     assert space.units == "um"
     assert space.origin == "Anterior-Superior-Left (ASL) corner of the 3D image volume"
+    expected_extent = np.array([13200.0, 8000.0, 11400.0])
+    npt.assert_array_equal(space.extent, expected_extent)
 
 
 def test_create_allen_ccfv3_space_custom_name():
@@ -118,3 +120,4 @@ def test_allen_ccfv3_space_write_read():
         assert read_table.space.space_name == "AllenCCFv3"
         assert read_table.space.orientation == "PIR"
         assert read_table.space.origin == "Anterior-Superior-Left (ASL) corner of the 3D image volume"
+        npt.assert_array_equal(read_table.space.extent, np.array([13200.0, 8000.0, 11400.0]))
