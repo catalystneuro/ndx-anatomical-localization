@@ -67,7 +67,9 @@ class Space(TempSpace):
             if np.any(extent <= 0):
                 raise ValueError("extent values must be positive")
 
-        super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation, extent=extent)
+        super().__init__(
+            name=name, space_name=space_name, origin=origin, units=units, orientation=orientation, extent=extent
+        )
 
 
 @register_class("AllenCCFv3Space", "ndx-anatomical-localization")
