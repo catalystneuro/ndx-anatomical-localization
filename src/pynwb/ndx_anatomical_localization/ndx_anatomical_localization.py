@@ -28,10 +28,16 @@ class Space(TempSpace):
         {
             "name": "orientation",
             "type": str,
-            "doc": """A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, the most common
-          orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a. dorsal).
-          For dorsal/ventral use 'S/I' (superior/inferior). In the AnatomicalCoordinatesTable, an orientation of
-          'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z)).""",
+            "doc": """A 3-letter string indicating the positive direction along each axis, where the 1st letter
+          is for x, 2nd for y, and 3rd for z. Each letter can be: A (Anterior), P (Posterior), L (Left),
+          R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three
+          anatomical dimensions (one from A/P, one from L/R, one from S/I). For example, 'RAS' means
+          positive x is Right, positive y is Anterior, positive z is Superior.
+
+          Notes:
+          - These three dimensions are also commonly referred to as AP, ML, and DV.
+          - This convention specifies positive directions (sometimes written as 'RAS+'), not origin
+            location - use the 'origin' field to describe where (0,0,0) is located.""",
         },
         allow_positional=AllowPositional.ERROR,
     )
@@ -54,9 +60,9 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
     The Allen Mouse Brain Common Coordinate Framework version 3 (2020).
 
     This canonical space represents the CCFv3 atlas with fixed orientation and origin.
-    Uses ASL orientation (x=anterior-posterior, y=superior-inferior/dorsal-ventral, z=left-right)
-    with 10 micrometer resolution. The origin (0,0,0) is at the dorsal-left-posterior corner
-    of the 3D image volume.
+    Uses PIR orientation (positive x=Posterior, positive y=Inferior, positive z=Right)
+    with 10 micrometer resolution. The origin (0,0,0) is at the Anterior-Superior-Left (ASL)
+    corner of the 3D image volume.
     """
 
     @docval(
@@ -67,9 +73,9 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
         super().__init__(
             name=name,
             space_name="AllenCCFv3",
-            origin="Dorsal-left-posterior corner of the 3D image volume",
+            origin="Anterior-Superior-Left (ASL) corner of the 3D image volume",
             units="um",
-            orientation="ASL",
+            orientation="PIR",
         )
 
 
