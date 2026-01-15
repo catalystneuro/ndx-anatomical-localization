@@ -1,3 +1,5 @@
+import numpy as np
+
 from hdmf.common import DynamicTable
 from hdmf.utils import get_docval, AllowPositional
 
@@ -39,9 +41,16 @@ class Space(TempSpace):
           - This convention specifies positive directions (sometimes written as 'RAS+'), not origin
             location - use the 'origin' field to describe where (0,0,0) is located.""",
         },
+        {
+            "name": "extent",
+            "type": "array_data",
+            "doc": "The spatial extent (bounding box dimensions) as [x, y, z]. Optional.",
+            "default": None,
+            "allow_none": True,
+        },
         allow_positional=AllowPositional.ERROR,
     )
-    def __init__(self, name, space_name, origin, units, orientation):
+    def __init__(self, name, space_name, origin, units, orientation, extent=None):
         assert len(orientation) == 3, "orientation must be a string of length 3"
         valid_values = ["A", "P", "L", "R", "S", "I"]
         for x in orientation:
@@ -51,7 +60,16 @@ class Space(TempSpace):
         new_var = [map[var] for var in orientation]
         assert len(set(new_var)) == 3, "orientation must be unique dimensions (AP, LR, SI)"
 
-        super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
+        if extent is not None:
+            extent = np.asarray(extent, dtype=np.float64)
+            if extent.shape != (3,):
+                raise ValueError("extent must be an array of shape (3,)")
+            if np.any(extent <= 0):
+                raise ValueError("extent values must be positive")
+
+        super().__init__(
+            name=name, space_name=space_name, origin=origin, units=units, orientation=orientation, extent=extent
+        )
 
 
 @register_class("AllenCCFv3Space", "ndx-anatomical-localization")
@@ -63,6 +81,8 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
     Uses PIR orientation (positive x=Posterior, positive y=Inferior, positive z=Right)
     with 10 micrometer resolution. The origin (0,0,0) is at the Anterior-Superior-Left (ASL)
     corner of the 3D image volume.
+
+    The atlas extent is 13200 x 8000 x 11400 micrometers (AP x DV x ML).
     """
 
     @docval(
@@ -76,6 +96,7 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
             origin="Anterior-Superior-Left (ASL) corner of the 3D image volume",
             units="um",
             orientation="PIR",
+            extent=np.array([13200.0, 8000.0, 11400.0]),
         )
 
 
