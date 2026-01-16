@@ -10,17 +10,15 @@ authors = [
 ]
 description = "Provide localization of objects (e.g. electrodes) against a reference image (e.g. CCF)"
 readme = "README.md"
-# requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "BSD-3"}
 classifiers = [
-    # TODO: add classifiers before release
-    # "Programming Language :: Python",
-    # "Programming Language :: Python :: 3.8",
-    # "Programming Language :: Python :: 3.9",
-    # "Programming Language :: Python :: 3.10",
-    # "Programming Language :: Python :: 3.11",
-    # "Programming Language :: Python :: 3.12",
-    # "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
@@ -112,3 +110,25 @@ line-length = 120
 
 [tool.ruff.lint.mccabe]
 max-complexity = 17
+
+[dependency-groups]
+# Minimum versions for testing compatibility
+min = [
+    "pynwb==2.8.0",
+    "hdmf==3.14.1",
+]
+
+# Development dependencies for testing, linting, and documentation
+dev = [
+    "black==24.4.2",
+    "codespell==2.3.0",
+    "coverage==7.5.4",
+    "hdmf-docutils==0.4.7",
+    "nwbwidgets==0.11.3",
+    "pre-commit==3.5.0",
+    "pytest==8.2.2",
+    "pytest-cov==5.0.0",
+    "pytest-subtests==0.12.1",
+    "python-dateutil==2.8.2",
+    "ruff==0.4.10",
+]

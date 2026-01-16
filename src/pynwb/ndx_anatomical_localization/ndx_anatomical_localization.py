@@ -1,11 +1,15 @@
+import numpy as np
+
 from hdmf.common import DynamicTable
 from pynwb.image import Image
 from pynwb.ophys import ImagingPlane
 from hdmf.utils import get_docval, AllowPositional
 
 from pynwb import get_class, register_class, docval
+from pynwb import get_class, register_class, docval
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
+TempAllenCCFv3Space = get_class("AllenCCFv3Space", "ndx-anatomical-localization")
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 Localization = get_class("Localization", "ndx-anatomical-localization")
 TempAnatomicalCoordinatesImage = get_class("AnatomicalCoordinatesImage", "ndx-anatomical-localization")
@@ -41,15 +45,28 @@ class Space(TempSpace):
             "name": "orientation",
             "type": str,
             "doc": (
-                """A 3-letter string. One of A,P,L,R,S,I for each of x, y, and z. For example, the most common
-          orientation is 'RAS', which means x is right, y is anterior, and z is superior (a.k.a. dorsal).
-          For dorsal/ventral use 'S/I' (superior/inferior). In the AnatomicalCoordinatesTable, an orientation of
-          'RAS' corresponds to coordinates in the order of (ML (x), AP (y), DV (z))."""
+                """A 3-letter string indicating the positive direction along each axis, where the 1st letter
+          is for x, 2nd for y, and 3rd for z. Each letter can be: A (Anterior), P (Posterior), L (Left),
+          R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three
+          anatomical dimensions (one from A/P, one from L/R, one from S/I). For example, 'RAS' means
+          positive x is Right, positive y is Anterior, positive z is Superior.
+
+          Notes:
+          - These three dimensions are also commonly referred to as AP, ML, and DV.
+          - This convention specifies positive directions (sometimes written as 'RAS+'), not origin
+            location - use the 'origin' field to describe where (0,0,0) is located."""
             ),
+        },
+        {
+            "name": "extent",
+            "type": "array_data",
+            "doc": "The spatial extent (bounding box dimensions) as [x, y, z]. Optional.",
+            "default": None,
+            "allow_none": True,
         },
         allow_positional=AllowPositional.ERROR,
     )
-    def __init__(self, name, space_name, origin, units, orientation):
+    def __init__(self, name, space_name, origin, units, orientation, extent=None):
         assert len(orientation) == 3, "orientation must be a string of length 3"
         valid_values = ["A", "P", "L", "R", "S", "I"]
         for x in orientation:
@@ -59,21 +76,51 @@ class Space(TempSpace):
         new_var = [map[var] for var in orientation]
         assert len(set(new_var)) == 3, "orientation must be unique dimensions (AP, LR, SI)"
 
-        super().__init__(name=name, space_name=space_name, origin=origin, units=units, orientation=orientation)
+        if extent is not None:
+            extent = np.asarray(extent, dtype=np.float64)
+            if extent.shape != (3,):
+                raise ValueError("extent must be an array of shape (3,)")
+            if np.any(extent <= 0):
+                raise ValueError("extent values must be positive")
 
-    @classmethod
-    def get_predefined_space(cls, space_name):
-        if space_name in PREDEFINED_SPACES:
-            return cls(**PREDEFINED_SPACES[space_name])
-        else:
-            raise ValueError(f"Space {space_name} is not predefined")
+        super().__init__(
+            name=name, space_name=space_name, origin=origin, units=units, orientation=orientation, extent=extent
+        )
+
+
+@register_class("AllenCCFv3Space", "ndx-anatomical-localization")
+class AllenCCFv3Space(TempAllenCCFv3Space):
+    """
+    The Allen Mouse Brain Common Coordinate Framework version 3 (2020).
+
+    This canonical space represents the CCFv3 atlas with fixed orientation and origin.
+    Uses PIR orientation (positive x=Posterior, positive y=Inferior, positive z=Right)
+    with 10 micrometer resolution. The origin (0,0,0) is at the Anterior-Superior-Left (ASL)
+    corner of the 3D image volume.
+
+    The atlas extent is 13200 x 8000 x 11400 micrometers (AP x DV x ML).
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "AllenCCFv3"},
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, name="AllenCCFv3"):
+        super().__init__(
+            name=name,
+            space_name="AllenCCFv3",
+            origin="Anterior-Superior-Left (ASL) corner of the 3D image volume",
+            units="um",
+            orientation="PIR",
+            extent=np.array([13200.0, 8000.0, 11400.0]),
+        )
 
 
 @register_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
 
     @docval(
-        {"name": "space", "type": Space, "doc": "space of the table"},
+        {"name": "space", "type": (Space, "AllenCCFv3Space"), "doc": "space of the table"},
         {"name": "method", "type": str, "doc": "method of the table"},
         {
             "name": "target",
@@ -88,8 +135,7 @@ class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
         columns = kwargs.get("columns")
         target = kwargs.pop("target")
         if not columns or "localized_entity" not in [c.name for c in columns]:
-            # set the target table of the "localized_entity" column only if
-            # the "localized_entity" column is not in "columns"
+            # set target table of "localized_entity" column only if not already in "columns"
             if target is None:
                 raise ValueError(
                     '"target" (the target table that contains the objects that have these coordinates) '

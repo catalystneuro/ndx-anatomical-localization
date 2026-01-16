@@ -18,10 +18,16 @@ pip install git+https://github.com/catalystneuro/ndx-anatomical-localization.git
 ### Spaces
 `Space` objects are used to define the coordinate system in which the objects are localized.
 Each Space object has the following attributes:
-  * `space_name`: The name of the space (e.g. "CCFv3")
-  * `origin`: The origin of the space (e.g. "bregma")
+  * `space_name`: The name of the space (e.g. "AllenCCFv3")
+  * `origin`: The origin of the space (e.g. "bregma" or "Dorsal-left-posterior corner of the 3D image volume")
   * `units`: The units of the space (e.g. "um")
-  * `orientation`: A 3-letter string. One of A, P, L, R, S, I for each of x, y, and z (e.g. "RAS").
+  * `orientation`: A 3-letter string indicating the positive direction along each axis, where the 1st letter is for x, the 2nd for y, and the 3rd for z. Each letter can be one of: A (Anterior), P (Posterior), L (Left), R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three anatomical dimensions (one from A/P, one from L/R, one from S/I). For example:
+    - "RAS" means positive x is Right, positive y is Anterior, positive z is Superior
+    - "PIR" means positive x is Posterior, positive y is Inferior, positive z is Right
+
+    **Notes**:
+    - The three anatomical dimensions are also commonly referred to as AP (Anterior-Posterior), ML (Medial-Lateral), and DV (Dorsal-Ventral).
+    - This convention specifies *positive directions*, not origin location. This is sometimes written as "RAS+" (with a plus sign) to make this explicit. Some tools (e.g., [BrainGlobe](https://brainglobe.info/documentation/setting-up/image-definition.html#orientation)) use a similar three-letter code to indicate where the origin is located instead - for example, "RAS" in that convention would mean the origin is at the Right-Anterior-Superior corner, which is equivalent to "LPI+" in the positive-direction convention. We use the positive-direction convention here; use the `origin` field to describe where (0,0,0) is located.
 
 You can define a custom space by creating a `Space` object with the desired attributes:
 
@@ -37,14 +43,24 @@ space = Space(
 )
 ```
 
-The Allen Institute Common Coordinate Framework v3 is predefined and can be accessed using the `get_predefined_space` method, or you can define a custom space.
-You can use the following syntax to use this space:
+#### Allen Mouse Brain Common Coordinate Framework v3 (CCFv3)
+
+The Allen Institute CCFv3 atlas is available as a canonical space class `AllenCCFv3Space` with fixed orientation and origin parameters:
+- **Orientation**: PIR (positive x=Posterior, positive y=Inferior, positive z=Right)
+- **Units**: micrometers (um)
+- **Resolution**: 10 micrometers isotropic
+- **Origin**: Anterior-Superior-Left (ASL) corner of the 3D image volume
+- **Dimensions**: 1320 x 800 x 1140 voxels
+
+You can create this canonical space directly:
 
 ```python
-from ndx_anatomical_localization import Space
+from ndx_anatomical_localization import AllenCCFv3Space
 
-space = Space.get_predefined_space("CCFv3")
+space = AllenCCFv3Space()
 ```
+
+The `AllenCCFv3Space` instance can be programmatically identified using `isinstance(space, AllenCCFv3Space)`.
 
 ### AnatomicalCoordinatesTable
 Once you have a `Space` object, you can create an `AnatomicalCoordinatesTable`.
@@ -95,7 +111,7 @@ Within `Localization`, you can create multiple `Space` and `AnatomicalCoordinate
 from pynwb.testing.mock.file import mock_NWBFile
 from pynwb.testing.mock.ecephys import mock_ElectrodeTable
 
-from ndx_anatomical_localization import AnatomicalCoordinatesTable, Space, Localization
+from ndx_anatomical_localization import AnatomicalCoordinatesTable, AllenCCFv3Space, Localization
 
 
 nwbfile = mock_NWBFile()
@@ -105,7 +121,7 @@ nwbfile.add_lab_meta_data([localization])
 
 electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
 
-space = Space.get_predefined_space("CCFv3")
+space = AllenCCFv3Space()
 localization.add_spaces([space])
 
 table = AnatomicalCoordinatesTable(
