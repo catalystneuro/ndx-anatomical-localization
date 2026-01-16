@@ -123,7 +123,7 @@ groups:
 
   - neurodata_type_def: AnatomicalCoordinatesImage
     neurodata_type_inc: NWBContainer
-    doc: "A class for storing anatomical coordinates as an image"
+    doc: "Image with Coordinates per Pixel. Each pixel stores its coordinates (x, y, z). Thus, x[i, j], y[i, j], z[i, j] give the atlas location for pixel (i, j)"
     links:
       - target_type: Space
         quantity: 1
@@ -155,7 +155,7 @@ groups:
         shape:
           - - null
             - null
-        doc: 2D array containing X coordinates for each pixel (width x height)
+        doc: 2D array containing X coordinates for each pixel (width x height) #TODO update to (height x width) once NWB schema is updated
         quantity: 1
       - name: y
         dtype: float32
@@ -165,7 +165,7 @@ groups:
         shape:
           - - null
             - null
-        doc: 2D array containing Y coordinates for each pixel (width x height)
+        doc: 2D array containing Y coordinates for each pixel (width x height) #TODO update to (height x width) once NWB schema is updated
         quantity: 1
       - name: z
         dtype: float32
@@ -175,7 +175,7 @@ groups:
         shape:
           - - null
             - null
-        doc: 2D array containing Z coordinates for each pixel (width x height)
+        doc: 2D array containing Z coordinates for each pixel (width x height) #TODO update to (height x width) once NWB schema is updated
         quantity: 1
 
       - name: brain_region

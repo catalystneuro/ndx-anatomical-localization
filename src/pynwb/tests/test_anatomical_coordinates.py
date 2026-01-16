@@ -143,7 +143,13 @@ def test_create_anatomical_coordinates_image_w_imaging_plane():
 
     imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
 
-    space = Space.get_predefined_space("CCFv3")
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
     localization.add_spaces([space])
 
     image_coordinates = AnatomicalCoordinatesImage(
@@ -171,7 +177,7 @@ def test_create_anatomical_coordinates_image_w_imaging_plane():
 
         assert read_coordinates_image.method == "method"
         assert read_coordinates_image.imaging_plane is read_imaging_plane
-        assert read_coordinates_image.space.fields == Space.get_predefined_space("CCFv3").fields
+        assert read_coordinates_image.space.origin == "bregma"
         npt.assert_array_equal(
             read_coordinates_image.x[:],
             np.ones((5, 5)),
@@ -201,7 +207,13 @@ def test_create_anatomical_coordinates_image_w_image():
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
 
-    space = Space.get_predefined_space("CCFv3")
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
     localization.add_spaces([space])
 
     image_coordinates = AnatomicalCoordinatesImage(
@@ -229,7 +241,7 @@ def test_create_anatomical_coordinates_image_w_image():
 
         assert read_coordinates_image.method == "method"
         assert read_coordinates_image.image is read_summary_image
-        assert read_coordinates_image.space.fields == Space.get_predefined_space("CCFv3").fields
+        assert read_coordinates_image.space.origin == "bregma"
         npt.assert_array_equal(
             read_coordinates_image.x[:],
             np.ones((5, 5)),
@@ -255,7 +267,13 @@ def test_create_anatomical_coordinates_image_failing_no_image_or_plane():
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
 
-    space = Space.get_predefined_space("CCFv3")
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
     localization.add_spaces([space])
     try:
         _ = AnatomicalCoordinatesImage(
@@ -281,7 +299,13 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
 
-    space = Space.get_predefined_space("CCFv3")
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
     localization.add_spaces([space])
 
     if "ophys" not in nwbfile.processing:
@@ -325,7 +349,13 @@ def test_create_anatomical_coordinates_image_failing_both_image_and_plane():
 
     imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
 
-    space = Space.get_predefined_space("CCFv3")
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
     localization.add_spaces([space])
     try:
         _ = AnatomicalCoordinatesImage(
@@ -354,7 +384,13 @@ def test_get_coordinates():
 
     imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
 
-    space = Space.get_predefined_space("CCFv3")
+    space = Space(
+        name="MySpace",
+        space_name="MySpace",
+        origin="bregma",
+        units="um",
+        orientation="RAS",
+    )
     localization.add_spaces([space])
 
     x_data = np.array([[0, 1, 2], [3, 4, 5], [6, 7, 8]])
