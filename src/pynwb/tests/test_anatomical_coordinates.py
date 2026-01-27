@@ -140,7 +140,8 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
 
-    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
+    imaging_name = "ImagingPlaneCCFv3SpaceTest"
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name=imaging_name)
 
     space = AllenCCFv3Space()
     localization.add_spaces([space])
@@ -163,7 +164,7 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
 
     with NWBHDF5IO("test_image_ccf.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
-        read_imaging_plane = read_nwbfile.imaging_planes["ImagingPlane"]
+        read_imaging_plane = read_nwbfile.imaging_planes[imaging_name]
         read_localization = read_nwbfile.lab_meta_data["localization"]
 
         read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
@@ -193,7 +194,8 @@ def test_create_anatomical_coordinates_image_w_imaging_plane():
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
 
-    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
+    imaging_plane_name = "ImagingPlane"
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name=imaging_plane_name)
 
     space = Space(
         name="MySpace",
