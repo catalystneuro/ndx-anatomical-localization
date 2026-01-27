@@ -10,6 +10,9 @@ groups:
       - neurodata_type_inc: Space
         quantity: "*"
         doc: "A space in which the coordinates are defined"
+      - neurodata_type_inc: AnatomicalCoordinatesImage
+        quantity: "*"
+        doc: "An container for storing localization of a field of view in a space"
   - neurodata_type_def: Space
     neurodata_type_inc: NWBContainer
     doc: "a space"
@@ -27,7 +30,8 @@ groups:
         dtype: text
         required: true
       - name: orientation
-        doc: "A 3-letter string indicating the positive direction along each axis, where the 1st letter
+        doc:
+          "A 3-letter string indicating the positive direction along each axis, where the 1st letter
           is for x, 2nd for y, and 3rd for z. Each letter can be: A (Anterior), P (Posterior), L (Left),
           R (Right), S (Superior/Dorsal), or I (Inferior/Ventral). The three letters must cover all three
           anatomical dimensions (one from A/P, one from L/R, one from S/I). For example, 'RAS' means
@@ -39,7 +43,8 @@ groups:
         required: true
     datasets:
       - name: extent
-        doc: "The spatial extent (bounding box dimensions) of the coordinate space as [x, y, z].
+        doc:
+          "The spatial extent (bounding box dimensions) of the coordinate space as [x, y, z].
           For corner-origin spaces like Allen CCF, this specifies the atlas dimensions.
           Units match the 'units' attribute. Optional - may be None for landmark-centered atlases."
         dtype: float64
@@ -50,9 +55,10 @@ groups:
         quantity: "?"
   - neurodata_type_def: AllenCCFv3Space
     neurodata_type_inc: Space
-    doc: "The Allen Mouse Brain Common Coordinate Framework version 3 (2020). This canonical space uses PIR orientation
-          (positive x=Posterior, positive y=Inferior, positive z=Right) with 10 micrometer resolution.
-          The origin (0,0,0) is at the anterior-superior-left corner of the 3D image volume."
+    doc:
+      "The Allen Mouse Brain Common Coordinate Framework version 3 (2020). This canonical space uses PIR orientation
+      (positive x=Posterior, positive y=Inferior, positive z=Right) with 10 micrometer resolution.
+      The origin (0,0,0) is at the anterior-superior-left corner of the 3D image volume."
     attributes:
       - name: space_name
         dtype: text
@@ -113,4 +119,83 @@ groups:
         neurodata_type_inc: VectorData
         doc: "The brain region associated with the localization"
         dtype: text
+        quantity: "?"
+
+  - neurodata_type_def: AnatomicalCoordinatesImage
+    neurodata_type_inc: NWBContainer
+    doc: "Image with Coordinates per Pixel. Each pixel stores its coordinates (x, y, z). Thus, x[i, j], y[i, j], z[i, j] give the atlas location for pixel (i, j)"
+    links:
+      - target_type: Space
+        quantity: 1
+        doc: "The space in which the coordinates are defined"
+        name: space
+      - target_type: Image
+        quantity: "?"
+        doc: "The image associated with the coordinates"
+        name: image
+      - target_type: ImagingPlane
+        quantity: "?"
+        doc: "The imaging plane associated with the coordinates"
+        name: imaging_plane
+    attributes:
+      - name: method
+        doc: "The method used to determine the coordinates"
+        dtype: text
+        required: true
+      - name: description
+        doc: "A description of the anatomical coordinates image"
+        dtype: text
+        required: false
+    datasets:
+      - name: x
+        dtype: float32
+        dims:
+          - - width
+            - height
+        shape:
+          - - null
+            - null
+        doc: 2D array containing X coordinates for each pixel (width x height) #TODO update to (height x width) once NWB schema is updated
+        quantity: 1
+      - name: y
+        dtype: float32
+        dims:
+          - - width
+            - height
+        shape:
+          - - null
+            - null
+        doc: 2D array containing Y coordinates for each pixel (width x height) #TODO update to (height x width) once NWB schema is updated
+        quantity: 1
+      - name: z
+        dtype: float32
+        dims:
+          - - width
+            - height
+        shape:
+          - - null
+            - null
+        doc: 2D array containing Z coordinates for each pixel (width x height) #TODO update to (height x width) once NWB schema is updated
+        quantity: 1
+
+      - name: brain_region
+        dtype: text
+        dims:
+          - - width
+            - height
+        shape:
+          - - null
+            - null
+        doc: 2D array of brain region names for each pixel
+        quantity: "?"
+
+      - name: brain_region_id
+        dtype: int32
+        dims:
+          - - width
+            - height
+        shape:
+          - - null
+            - null
+        doc: 2D array of brain region IDs for each pixel (corresponding to atlas ontology)
         quantity: "?"
