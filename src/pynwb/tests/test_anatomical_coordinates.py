@@ -134,6 +134,59 @@ def test_allen_ccfv3_space_write_read():
         npt.assert_array_equal(read_table.space.extent, np.array([13200.0, 8000.0, 11400.0]))
 
 
+def test_anatomical_coordinates_image_with_allen_ccfv3_space():
+    nwbfile = mock_NWBFile()
+
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    imaging_name = "ImagingPlaneCCFv3SpaceTest"
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name=imaging_name)
+
+    space = AllenCCFv3Space()
+    localization.add_spaces([space])
+
+    image_coordinates = AnatomicalCoordinatesImage(
+        name="MyAnatomicalLocalization",
+        imaging_plane=imaging_plane,
+        method="method",
+        space=space,
+        x=np.ones((5, 5)),
+        y=np.ones((5, 5)) * 2.0,
+        z=np.ones((5, 5)) * 3.0,
+        brain_region=np.array([["CA1"] * 5] * 5),
+    )
+
+    localization.add_anatomical_coordinates_images([image_coordinates])
+
+    with NWBHDF5IO("test_image_ccf.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO("test_image_ccf.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_imaging_plane = read_nwbfile.imaging_planes[imaging_name]
+        read_localization = read_nwbfile.lab_meta_data["localization"]
+
+        read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
+
+        assert read_coordinates_image.method == "method"
+        assert read_coordinates_image.imaging_plane is read_imaging_plane
+        assert isinstance(read_coordinates_image.space, AllenCCFv3Space)
+        npt.assert_array_equal(
+            read_coordinates_image.x[:],
+            np.ones((5, 5)),
+        )
+        npt.assert_array_equal(
+            read_coordinates_image.y[:],
+            np.ones((5, 5)) * 2.0,
+        )
+        npt.assert_array_equal(
+            read_coordinates_image.z[:],
+            np.ones((5, 5)) * 3.0,
+        )
+        npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
+
+
 def test_create_anatomical_coordinates_image_w_imaging_plane():
 
     nwbfile = mock_NWBFile()
@@ -141,7 +194,8 @@ def test_create_anatomical_coordinates_image_w_imaging_plane():
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
 
-    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
+    imaging_plane_name = "ImagingPlane"
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name=imaging_plane_name)
 
     space = Space(
         name="MySpace",
