@@ -8,10 +8,6 @@ from hdmf.utils import get_docval, AllowPositional
 from pynwb import get_class, register_class, docval
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
-TempAllenCCFv3Space = get_class("AllenCCFv3Space", "ndx-anatomical-localization")
-TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
-Localization = get_class("Localization", "ndx-anatomical-localization")
-TempAnatomicalCoordinatesImage = get_class("AnatomicalCoordinatesImage", "ndx-anatomical-localization")
 
 PREDEFINED_SPACES = {
     "CCFv3": {
@@ -87,6 +83,10 @@ class Space(TempSpace):
         )
 
 
+# Get AllenCCFv3Space AFTER Space is registered, so it can see the registered Space class
+TempAllenCCFv3Space = get_class("AllenCCFv3Space", "ndx-anatomical-localization")
+
+
 @register_class("AllenCCFv3Space", "ndx-anatomical-localization")
 class AllenCCFv3Space(TempAllenCCFv3Space):
     """
@@ -115,11 +115,17 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
         )
 
 
+# Get these AFTER Space and AllenCCFv3Space are registered
+TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
+TempAnatomicalCoordinatesImage = get_class("AnatomicalCoordinatesImage", "ndx-anatomical-localization")
+Localization = get_class("Localization", "ndx-anatomical-localization")
+
+
 @register_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
 
     @docval(
-        {"name": "space", "type": (Space, "AllenCCFv3Space"), "doc": "space of the table"},
+        {"name": "space", "type": Space, "doc": "space of the table"},
         {"name": "method", "type": str, "doc": "method of the table"},
         {
             "name": "target",
