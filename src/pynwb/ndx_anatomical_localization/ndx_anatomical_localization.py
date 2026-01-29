@@ -158,8 +158,8 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
     @docval(
         {"name": "name", "type": str, "doc": "name of the NWB object"},
         {"name": "description", "type": str, "doc": "description of the NWB object", "default": None},
-        {"name": "space", "type": Space, "doc": "space of the table"},
-        {"name": "method", "type": str, "doc": "method of the table"},
+        {"name": "space", "type": (Space, "AllenCCFv3Space"), "doc": "space of the image"},
+        {"name": "method", "type": str, "doc": "method of the image"},
         {"name": "image", "type": Image, "doc": "The image associated with the coordinates", "default": None},
         {
             "name": "imaging_plane",
