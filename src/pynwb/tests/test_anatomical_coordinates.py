@@ -1,7 +1,5 @@
 """Unit and integration tests for the new neurodata type."""
 
-import re
-
 import pytest
 from pynwb import NWBHDF5IO
 from pynwb.base import Images
@@ -659,7 +657,9 @@ def test_brain_region_masks_write_read(tmp_path):
 
 
 def test_atlas_registration_missing_images():
-    with pytest.raises(Exception, match="'source_image', 'registered_image' must be provided in AtlasRegistration.__init__"):
+    with pytest.raises(
+        Exception, match="'source_image', 'registered_image' must be provided in AtlasRegistration.__init__"
+    ):
         AtlasRegistration()
 
 
