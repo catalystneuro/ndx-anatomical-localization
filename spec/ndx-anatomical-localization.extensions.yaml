@@ -265,15 +265,15 @@ groups:
     datasets:
       - name: "x"
         neurodata_type_inc: VectorData
-        dtype: uint32
+        dtype: int32
         doc: "Pixel x-coordinate."
       - name: "y"
         neurodata_type_inc: VectorData
-        dtype: uint32
+        dtype: int32
         doc: "Pixel y-coordinate."
       - name: brain_region_id
         neurodata_type_inc: VectorData
-        dtype: uint32
+        dtype: int32
         doc: "Brain region IDs for each pixel (corresponding to atlas ontology)."
 
   - neurodata_type_def: AtlasRegistration
