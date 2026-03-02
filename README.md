@@ -114,15 +114,7 @@ Each row stores the `(x, y)` pixel coordinates and the corresponding `brain_regi
 This is the richer representation: it preserves all spatial information, lets downstream users choose any segmentation 
 level of the atlas hierarchy. 
 
-**Use `BrainRegionMasks`** when the full coordinate field is unavailable and you only have region-level output. 
-This can happen in two common situations:
-
-1. **The registration was done externally and only the masks were saved** — e.g., some pipelines store the result of projecting atlas region boundaries back onto the FOV but do not output or preserve the full per-pixel coordinate field. There is no way to reconstruct `x[i, j]`, `y[i, j]`, `z[i, j]` after the fact.
-2. **The affine transformation is unavailable** — without it, you cannot apply the inverse transform to go from atlas space back to image space, so storing the coordinate field is not possible.
-
-In both cases, `BrainRegionMasks` lets you store and retrieve the region masks directly in imaging space, enabling region-based activity extraction from the raw video without any additional computation.
-
-When both `BrainRegionMasks` and `AnatomicalCoordinatesImage`  are feasible, storing `AnatomicalCoordinatesImage` gives downstream users the most flexibility.
+**Use `BrainRegionMasks`** when per-pixel atlas coordinates are unavailable.
 
 ```python
 from ndx_anatomical_localization import BrainRegionMasks
