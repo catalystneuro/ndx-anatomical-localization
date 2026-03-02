@@ -272,12 +272,6 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
             "doc": "2D array of brain region names for each pixel",
             "default": None,
         },
-        {
-            "name": "brain_region_id",
-            "type": ("array_data", "data"),
-            "doc": "2D array of brain region IDs for each pixel (corresponding to atlas ontology)",
-            "default": None,
-        },
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
