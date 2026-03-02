@@ -24,6 +24,10 @@ from .ndx_anatomical_localization import (
     AnatomicalCoordinatesTable,
     Localization,
     AnatomicalCoordinatesImage,
+    Landmarks,
+    AffineTransformation,
+    BrainRegionMasks,
+    AtlasRegistration,
 )
 
 # NOTE: `widgets/tetrode_series_widget.py` adds a "widget"

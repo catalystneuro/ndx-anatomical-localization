@@ -114,6 +114,90 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
             extent=np.array([13200.0, 8000.0, 11400.0]),
         )
 
+BrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localization")
+Landmarks = get_class("Landmarks", "ndx-anatomical-localization")
+
+# AffineTransformation: custom class adds shape validation on the matrix.
+TempAffineTransformation = get_class("AffineTransformation", "ndx-anatomical-localization")
+
+
+@register_class("AffineTransformation", "ndx-anatomical-localization")
+class AffineTransformation(TempAffineTransformation):
+    """A 3x3 affine transformation matrix in homogeneous coordinates.
+
+    Supports 2D operations: translation, rotation, scaling, and shearing.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object"},
+        {
+            "name": "affine_matrix",
+            "type": "array_data",
+            "doc": "3x3 affine transformation matrix in homogeneous coordinates",
+        },
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, **kwargs):
+        affine_matrix = np.asarray(kwargs["affine_matrix"], dtype=np.float64)
+        if affine_matrix.shape != (3, 3):
+            raise ValueError(
+                f"Affine matrix must be a 3x3 array. Provided shape: {affine_matrix.shape}"
+            )
+        kwargs["affine_matrix"] = affine_matrix
+        super().__init__(**kwargs)
+
+
+# AtlasRegistration: custom class validates that source_image and registered_image are provided.
+TempAtlasRegistration = get_class("AtlasRegistration", "ndx-anatomical-localization")
+
+
+@register_class("AtlasRegistration", "ndx-anatomical-localization")
+class AtlasRegistration(TempAtlasRegistration):
+
+    @docval(
+        {
+            "name": "source_image",
+            "type": Image,
+            "doc": "Image representing the source FOV.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "registered_image",
+            "type": Image,
+            "doc": "Image representing the registered FOV.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "atlas_projection",
+            "type": Image,
+            "doc": "The atlas projection image used as reference in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "affine_transformation",
+            "type": AffineTransformation,
+            "doc": "A spatial transformation used in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "landmarks",
+            "type": Landmarks,
+            "doc": "Landmarks used in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, **kwargs):
+        missing = [f"'{k}'" for k in ("source_image", "registered_image") if kwargs.get(k) is None]
+        if missing:
+            raise ValueError(f"{', '.join(missing)} must be provided in AtlasRegistration.__init__")
+        super().__init__(**kwargs)
+
 
 # Get these AFTER Space and AllenCCFv3Space are registered
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
