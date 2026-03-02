@@ -502,11 +502,19 @@ def test_landmarks_write_read():
     nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary images"))
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
-    image_collection.add_image(GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)), description="registered FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)), description="registered FOV")
+    )
 
     landmarks = Landmarks(name="landmarks", description="landmark correspondences")
-    landmarks.add_row(source_x=100.0, source_y=200.0, reference_x=5000.0, reference_y=3000.0, landmark_labels="bregma", confidence=0.95)
-    landmarks.add_row(source_x=150.0, source_y=250.0, reference_x=6000.0, reference_y=4000.0, landmark_labels="lambda", confidence=0.90)
+    landmarks.add_row(
+        source_x=100.0, source_y=200.0, reference_x=5000.0, reference_y=3000.0,
+        landmark_labels="bregma", confidence=0.95
+    )
+    landmarks.add_row(
+        source_x=150.0, source_y=250.0, reference_x=6000.0, reference_y=4000.0,
+        landmark_labels="lambda", confidence=0.90
+    )
 
     registration = AtlasRegistration(
         source_image=image_collection["SourceImage"],
@@ -554,7 +562,9 @@ def test_affine_transformation_write_read():
     nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary images"))
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
-    image_collection.add_image(GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)), description="registered FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)), description="registered FOV")
+    )
 
     matrix = np.array([[0.99, -0.14, 50.0], [0.14, 0.99, 30.0], [0.0, 0.0, 1.0]])
     affine = AffineTransformation(name="affine_transformation", affine_matrix=matrix)
@@ -657,7 +667,9 @@ def test_atlas_registration_with_image_write_read():
     nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary"))
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
-    image_collection.add_image(GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)) * 2, description="registered FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)) * 2, description="registered FOV")
+    )
     image_collection.add_image(GrayscaleImage(name="AtlasProjection", data=np.ones((5, 5)) * 3, description="atlas"))
 
     space = AllenCCFv3Space()
@@ -697,7 +709,9 @@ def test_atlas_registration_with_landmarks_write_read():
     nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary"))
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
-    image_collection.add_image(GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)) * 2, description="registered FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)) * 2, description="registered FOV")
+    )
 
     landmarks = Landmarks(name="landmarks", description="registration landmarks")
     landmarks.add_row(source_x=50.0, source_y=100.0, reference_x=4000.0, reference_y=2000.0)
