@@ -1,5 +1,8 @@
 """Unit and integration tests for the new neurodata type."""
 
+import re
+
+import pytest
 from pynwb import NWBHDF5IO
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
@@ -496,7 +499,7 @@ def test_create_landmarks_with_optional_columns():
     assert len(table) == 2
 
 
-def test_landmarks_write_read():
+def test_landmarks_write_read(tmp_path):
     nwbfile = mock_NWBFile()
     nwbfile.create_processing_module("ophys", "ophys")
     nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary images"))
@@ -523,10 +526,10 @@ def test_landmarks_write_read():
     )
     nwbfile.add_lab_meta_data([registration])
 
-    with NWBHDF5IO("test_landmarks.nwb", "w") as io:
+    with NWBHDF5IO(tmp_path / "test_landmarks.nwb", "w") as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO("test_landmarks.nwb", "r", load_namespaces=True) as io:
+    with NWBHDF5IO(tmp_path / "test_landmarks.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
         read_landmarks = read_registration.landmarks
@@ -550,13 +553,11 @@ def test_create_affine_transformation():
 
 
 def test_affine_transformation_invalid_shape():
-    try:
+    with pytest.raises(ValueError, match=r"Affine matrix must be a 3x3 array\. Provided shape: \(4, 4\)"):
         AffineTransformation(name="affine_transformation", affine_matrix=np.eye(4))
-    except ValueError as e:
-        assert str(e) == "Affine matrix must be a 3x3 array. Provided shape: (4, 4)"
 
 
-def test_affine_transformation_write_read():
+def test_affine_transformation_write_read(tmp_path):
     nwbfile = mock_NWBFile()
     nwbfile.create_processing_module("ophys", "ophys")
     nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary images"))
@@ -576,10 +577,10 @@ def test_affine_transformation_write_read():
     )
     nwbfile.add_lab_meta_data([registration])
 
-    with NWBHDF5IO("test_affine.nwb", "w") as io:
+    with NWBHDF5IO(tmp_path / "test_affine.nwb", "w") as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO("test_affine.nwb", "r", load_namespaces=True) as io:
+    with NWBHDF5IO(tmp_path / "test_affine.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
         read_affine = read_registration.affine_transformation
@@ -617,7 +618,7 @@ def test_brain_region_masks_to_image():
     assert img[0, 0] == 0  # background pixel
 
 
-def test_brain_region_masks_write_read():
+def test_brain_region_masks_write_read(tmp_path):
     nwbfile = mock_NWBFile()
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
@@ -635,10 +636,10 @@ def test_brain_region_masks_write_read():
 
     localization.add_brain_region_masks([src_masks, reg_masks])
 
-    with NWBHDF5IO("test_masks.nwb", "w") as io:
+    with NWBHDF5IO(tmp_path / "test_masks.nwb", "w") as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO("test_masks.nwb", "r", load_namespaces=True) as io:
+    with NWBHDF5IO(tmp_path / "test_masks.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_localization = read_nwbfile.lab_meta_data["localization"]
 
@@ -658,23 +659,19 @@ def test_brain_region_masks_write_read():
 
 
 def test_atlas_registration_missing_images():
-    try:
+    with pytest.raises(Exception, match="'source_image', 'registered_image' must be provided in AtlasRegistration.__init__"):
         AtlasRegistration()
-    except Exception as e:
-        assert str(e) == "'source_image', 'registered_image' must be provided in AtlasRegistration.__init__"
 
 
 def test_atlas_registration_missing_registered_image():
     """Creating AtlasRegistration without the required registered_image should raise an error."""
     source_img = GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source")
 
-    try:
+    with pytest.raises(Exception, match="'registered_image' must be provided in AtlasRegistration.__init__"):
         AtlasRegistration(source_image=source_img)
-    except Exception as e:
-        assert str(e) == "'registered_image' must be provided in AtlasRegistration.__init__"
 
 
-def test_atlas_registration_with_image_write_read():
+def test_atlas_registration_with_image_write_read(tmp_path):
     nwbfile = mock_NWBFile()
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
@@ -702,10 +699,10 @@ def test_atlas_registration_with_image_write_read():
     )
     nwbfile.add_lab_meta_data([registration])
 
-    with NWBHDF5IO("test_atlas_registration.nwb", "w") as io:
+    with NWBHDF5IO(tmp_path / "test_atlas_registration.nwb", "w") as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO("test_atlas_registration.nwb", "r", load_namespaces=True) as io:
+    with NWBHDF5IO(tmp_path / "test_atlas_registration.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_src_image = read_nwbfile.processing["ophys"]["SummaryImages"]["SourceImage"]
         read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
@@ -716,7 +713,7 @@ def test_atlas_registration_with_image_write_read():
         npt.assert_array_almost_equal(read_registration.affine_transformation.affine_matrix[:], np.eye(3))
 
 
-def test_atlas_registration_with_landmarks_write_read():
+def test_atlas_registration_with_landmarks_write_read(tmp_path):
     nwbfile = mock_NWBFile()
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
@@ -743,10 +740,10 @@ def test_atlas_registration_with_landmarks_write_read():
     nwbfile.add_lab_meta_data([registration])
     localization.add_brain_region_masks([src_masks])
 
-    with NWBHDF5IO("test_atlas_registration_plane.nwb", "w") as io:
+    with NWBHDF5IO(tmp_path / "test_atlas_registration_plane.nwb", "w") as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO("test_atlas_registration_plane.nwb", "r", load_namespaces=True) as io:
+    with NWBHDF5IO(tmp_path / "test_atlas_registration_plane.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_localization = read_nwbfile.lab_meta_data["localization"]
         read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
@@ -766,7 +763,7 @@ def test_atlas_registration_with_landmarks_write_read():
         )
 
 
-def test_brain_region_masks_directly_under_localization():
+def test_brain_region_masks_directly_under_localization(tmp_path):
     """BrainRegionMasks can be stored under Localization without any AtlasRegistration."""
     nwbfile = mock_NWBFile()
     localization = Localization()
@@ -779,10 +776,10 @@ def test_brain_region_masks_directly_under_localization():
 
     localization.add_brain_region_masks([masks])
 
-    with NWBHDF5IO("test_brain_region_masks_direct.nwb", "w") as io:
+    with NWBHDF5IO(tmp_path / "test_brain_region_masks_direct.nwb", "w") as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO("test_brain_region_masks_direct.nwb", "r", load_namespaces=True) as io:
+    with NWBHDF5IO(tmp_path / "test_brain_region_masks_direct.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_localization = read_nwbfile.lab_meta_data["localization"]
 
