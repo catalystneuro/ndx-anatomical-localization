@@ -114,7 +114,35 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
             extent=np.array([13200.0, 8000.0, 11400.0]),
         )
 
-BrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localization")
+TempBrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localization")
+
+
+@register_class("BrainRegionMasks", "ndx-anatomical-localization")
+class BrainRegionMasks(TempBrainRegionMasks):
+
+    def to_image(self, image_height: int, image_width: int) -> np.ndarray:
+        """Reconstruct a 2D brain region ID array from the flat (x, y, brain_region_id) table.
+
+        Parameters
+        ----------
+        image_height : int
+            Height of the output array in pixels.
+        image_width : int
+            Width of the output array in pixels.
+
+        Returns
+        -------
+        np.ndarray of shape (image_height, image_width), dtype int32
+            Each pixel contains the brain_region_id at that location, or 0 where no mask entry exists.
+        """
+        img = np.zeros((image_height, image_width), dtype=np.int32)
+        xs = self["x"].data[:]
+        ys = self["y"].data[:]
+        ids = self["brain_region_id"].data[:]
+        img[ys, xs] = ids
+        return img
+
+
 Landmarks = get_class("Landmarks", "ndx-anatomical-localization")
 
 # AffineTransformation: custom class adds shape validation on the matrix.

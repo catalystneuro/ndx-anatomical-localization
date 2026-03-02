@@ -601,6 +601,22 @@ def test_create_brain_region_masks():
     assert len(masks) == 3
 
 
+def test_brain_region_masks_to_image():
+    masks = BrainRegionMasks(name="masks", description="pixel masks")
+    masks.add_row(x=10, y=20, brain_region_id=1)
+    masks.add_row(x=11, y=20, brain_region_id=1)
+    masks.add_row(x=10, y=21, brain_region_id=2)
+
+    img = masks.to_image(image_height=30, image_width=20)
+
+    assert img.shape == (30, 20)
+    assert img.dtype == np.int32
+    assert img[20, 10] == 1
+    assert img[20, 11] == 1
+    assert img[21, 10] == 2
+    assert img[0, 0] == 0  # background pixel
+
+
 def test_brain_region_masks_write_read():
     nwbfile = mock_NWBFile()
     localization = Localization()
