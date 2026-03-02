@@ -192,16 +192,6 @@ groups:
         doc: 2D array of brain region names for each pixel
         quantity: "?"
 
-      - name: brain_region_id
-        dtype: int32
-        dims:
-          - - width
-            - height
-        shape:
-          - - null
-            - null
-        doc: 2D array of brain region IDs for each pixel (corresponding to atlas ontology)
-        quantity: "?"
 
   - neurodata_type_def: Landmarks
     neurodata_type_inc: DynamicTable
@@ -284,7 +274,7 @@ groups:
       - name: brain_region_id
         neurodata_type_inc: VectorData
         dtype: uint32
-        doc: "Brain region ID of the pixel."
+        doc: "Brain region IDs for each pixel (corresponding to atlas ontology)."
 
   - neurodata_type_def: AtlasRegistration
     neurodata_type_inc: LabMetaData
