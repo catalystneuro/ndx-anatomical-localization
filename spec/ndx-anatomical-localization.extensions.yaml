@@ -241,8 +241,9 @@ groups:
   - neurodata_type_def: AffineTransformation
     neurodata_type_inc: NWBContainer
     doc: |
-      Affine transformation used in image registration and coordinate mapping.
-      Supports transformations between different coordinate spaces (e.g., image space to atlas space).
+      Affine transformation mapping from lab (imaging) space to atlas space.
+      Given a pixel coordinate in the source image, applying the affine matrix yields
+      the corresponding coordinate in the reference atlas space.
       For 2D: 6 DOF (rotation, translation, scaling, shearing)
     datasets:
       - name: affine_matrix
