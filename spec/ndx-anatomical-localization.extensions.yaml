@@ -262,7 +262,16 @@ groups:
 
   - neurodata_type_def: BrainRegionMasks
     neurodata_type_inc: DynamicTable
-    doc: "A table for storing brain region masks to extract activity from specific brain regions."
+    doc: |
+      A table storing per-pixel brain region assignments, where each row represents
+      a pixel identified by its (x, y) coordinate and the ID of the atlas region it
+      belongs to. The masks can be used to extract brain-region-specific activity 
+      time courses from widefield or two-photon calcium imaging by averaging the 
+      corresponding pixels in the raw or processed video for all rows 
+      of a region of interest. It can also be used to store the result of 
+      projecting atlas region boundaries back onto the imaging field of view 
+      when the full coordinate field is not available.
+
     datasets:
       - name: "x"
         neurodata_type_inc: VectorData
