@@ -120,7 +120,7 @@ TempBrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localizatio
 @register_class("BrainRegionMasks", "ndx-anatomical-localization")
 class BrainRegionMasks(TempBrainRegionMasks):
 
-    def to_image(self, image_height: int, image_width: int) -> np.ndarray:
+    def _to_image(self, image_height: int, image_width: int) -> np.ndarray:
         """Reconstruct a 2D brain region ID array from the flat (x, y, brain_region_id) table.
 
         Parameters

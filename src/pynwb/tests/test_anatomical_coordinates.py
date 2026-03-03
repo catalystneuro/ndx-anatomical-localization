@@ -606,7 +606,7 @@ def test_brain_region_masks_to_image():
     masks.add_row(x=11, y=20, brain_region_id=1)
     masks.add_row(x=10, y=21, brain_region_id=2)
 
-    img = masks.to_image(image_height=30, image_width=20)
+    img = masks._to_image(image_height=30, image_width=20)
 
     assert img.shape == (30, 20)
     assert img.dtype == np.int32
