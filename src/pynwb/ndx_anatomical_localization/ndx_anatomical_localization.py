@@ -221,9 +221,8 @@ class AtlasRegistration(TempAtlasRegistration):
         allow_positional=AllowPositional.ERROR,
     )
     def __init__(self, **kwargs):
-        missing = [f"'{k}'" for k in ("source_image", "registered_image") if kwargs.get(k) is None]
-        if missing:
-            raise ValueError(f"{', '.join(missing)} must be provided in AtlasRegistration.__init__")
+        if kwargs.get("source_image") is None:
+            raise ValueError("'source_image' must be provided in AtlasRegistration.__init__")
         super().__init__(**kwargs)
 
 

@@ -297,7 +297,7 @@ groups:
         doc: "Image representing the source FOV (e.g. mean image, maximum projection, etc.)."
       - target_type: Image
         name: registered_image
-        quantity: 1
+        quantity: "?"
         doc: "Image representing the registered FOV. This is the image after applying the spatial transformation to the source image."
       - target_type: Image
         name: atlas_projection

@@ -656,19 +656,17 @@ def test_brain_region_masks_write_read(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-def test_atlas_registration_missing_images():
-    with pytest.raises(
-        Exception, match="'source_image', 'registered_image' must be provided in AtlasRegistration.__init__"
-    ):
+def test_atlas_registration_missing_source_image():
+    with pytest.raises(Exception, match="'source_image' must be provided in AtlasRegistration.__init__"):
         AtlasRegistration()
 
 
-def test_atlas_registration_missing_registered_image():
-    """Creating AtlasRegistration without the required registered_image should raise an error."""
+def test_atlas_registration_without_registered_image():
+    """Creating AtlasRegistration without registered_image is allowed."""
     source_img = GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source")
-
-    with pytest.raises(Exception, match="'registered_image' must be provided in AtlasRegistration.__init__"):
-        AtlasRegistration(source_image=source_img)
+    registration = AtlasRegistration(source_image=source_img)
+    assert registration.source_image is source_img
+    assert registration.registered_image is None
 
 
 def test_atlas_registration_with_image_write_read(tmp_path):
