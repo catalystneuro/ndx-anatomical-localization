@@ -13,6 +13,9 @@ groups:
       - neurodata_type_inc: AnatomicalCoordinatesImage
         quantity: "*"
         doc: "An container for storing localization of a field of view in a space"
+      - neurodata_type_inc: BrainRegionMasks
+        quantity: "*"
+        doc: "A table for storing brain region masks to extract activity from specific brain regions."
   - neurodata_type_def: Space
     neurodata_type_inc: NWBContainer
     doc: "a space"
@@ -189,13 +192,121 @@ groups:
         doc: 2D array of brain region names for each pixel
         quantity: "?"
 
-      - name: brain_region_id
-        dtype: int32
-        dims:
-          - - width
-            - height
-        shape:
-          - - null
-            - null
-        doc: 2D array of brain region IDs for each pixel (corresponding to atlas ontology)
+
+  - neurodata_type_def: Landmarks
+    neurodata_type_inc: DynamicTable
+    doc: |
+      Spatial landmarks annotated on an image with their pixel coordinates in both
+      source and transformed spaces.
+    datasets:
+      - name: source_x
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "Pixel x-coordinate of the landmark in the source space."
+      - name: source_y
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "Pixel y-coordinate of the landmark in the source space."
+      - name: registered_x
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "Pixel x-coordinate of the landmark in the registered space. This is the transformed result of applying the spatial transformation to the source coordinates."
         quantity: "?"
+      - name: registered_y
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "Pixel y-coordinate of the landmark in the registered space. This is the transformed result of applying the spatial transformation to the source coordinates."
+        quantity: "?"
+      - name: reference_x
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "Pixel x-coordinate of the landmark in the reference atlas space."
+        quantity: "?"
+      - name: reference_y
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "Pixel y-coordinate of the landmark in the reference atlas space."
+        quantity: "?"
+      - name: landmark_labels
+        neurodata_type_inc: VectorData
+        dtype: text
+        doc: "The labels or names for each landmark."
+        quantity: "?"
+      - name: confidence
+        neurodata_type_inc: VectorData
+        dtype: float32
+        doc: "The confidence scores in the range [0, 1] for each landmark correspondence."
+        quantity: "?"
+
+  - neurodata_type_def: AffineTransformation
+    neurodata_type_inc: NWBContainer
+    doc: |
+      Affine transformation mapping from lab (imaging) space to atlas space.
+      Given a pixel coordinate in the source image, applying the affine matrix yields
+      the corresponding coordinate in the reference atlas space.
+      For 2D: 6 DOF (rotation, translation, scaling, shearing)
+    datasets:
+      - name: affine_matrix
+        dtype: float64
+        dims:
+          - - rows
+            - cols
+        shape:
+          - - 3
+            - 3
+        doc: |
+          Affine transformation matrix in homogeneous coordinates.
+          Shape: (3, 3) for 2D.
+          Last row is [0, 0, ..., 1] for homogeneous representation.
+        quantity: 1
+
+  - neurodata_type_def: BrainRegionMasks
+    neurodata_type_inc: DynamicTable
+    doc: |
+      A table storing per-pixel brain region assignments, where each row represents
+      a pixel identified by its (x, y) coordinate and the ID of the atlas region it
+      belongs to. The masks can be used to extract brain-region-specific activity 
+      time courses from widefield or two-photon calcium imaging by averaging the 
+      corresponding pixels in the raw or processed video for all rows 
+      of a region of interest. It can also be used to store the result of 
+      projecting atlas region boundaries back onto the imaging field of view 
+      when the full coordinate field is not available.
+
+    datasets:
+      - name: "x"
+        neurodata_type_inc: VectorData
+        dtype: int32
+        doc: "Pixel x-coordinate."
+      - name: "y"
+        neurodata_type_inc: VectorData
+        dtype: int32
+        doc: "Pixel y-coordinate."
+      - name: brain_region_id
+        neurodata_type_inc: VectorData
+        dtype: int32
+        doc: "Brain region IDs for each pixel (corresponding to atlas ontology)."
+
+  - neurodata_type_def: AtlasRegistration
+    neurodata_type_inc: LabMetaData
+    name: atlas_registration
+    doc: "A class for storing atlas registration processing for a FOV."
+    links:
+      - target_type: Image
+        name: source_image
+        quantity: 1
+        doc: "Image representing the source FOV (e.g. mean image, maximum projection, etc.)."
+      - target_type: Image
+        name: registered_image
+        quantity: "?"
+        doc: "Image representing the registered FOV. This is the image after applying the spatial transformation to the source image."
+      - target_type: Image
+        name: atlas_projection
+        quantity: "?"
+        doc: "The atlas projection image used as reference in the registration."
+    groups:
+      - neurodata_type_inc: AffineTransformation
+        quantity: "?"
+        doc: "A spatial transformation used in the registration."
+      - neurodata_type_inc: Landmarks
+        quantity: "?"
+        doc: "Landmarks used in the registration."

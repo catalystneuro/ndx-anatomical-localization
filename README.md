@@ -102,6 +102,30 @@ The `get_coordinates()` function return the image with anatomical coordinates pe
 
 Each pixel stores its anatomical coordinates (x, y, z)
 
+---
+
+### BrainRegionMasks
+`BrainRegionMasks` is a `DynamicTable` that maps pixels in the original imaging space to brain region IDs.
+Each row stores the `(x, y)` pixel coordinates and the corresponding `brain_region_id` from the atlas ontology.
+
+#### When to use `BrainRegionMasks` vs `AnatomicalCoordinatesImage`
+
+**Prefer `AnatomicalCoordinatesImage`** when you have full atlas coordinates for every pixel (x, y, z). 
+This is the richer representation: it preserves all spatial information, lets downstream users choose any segmentation 
+level of the atlas hierarchy. 
+
+**Use `BrainRegionMasks`** when per-pixel atlas coordinates are unavailable.
+
+```python
+from ndx_anatomical_localization import BrainRegionMasks
+
+masks = BrainRegionMasks(name="source_brain_region_id_masks", description="Pixel masks for primary visual cortex in source image space.")
+masks.add_row(x=10, y=20, brain_region_id=385)
+masks.add_row(x=11, y=20, brain_region_id=385)
+masks.add_row(x=10, y=21, brain_region_id=385)
+
+```
+
 
 ### Localization
 The `Localization` object is used to store the spaces and anatomical coordinates tables in the /general section of the NWB file.
@@ -208,6 +232,124 @@ image_coordinates = AnatomicalCoordinatesImage(
 
 localization.add_anatomical_coordinates_images([image_coordinates])
 ```
+#### Example with BrainRegionMasks
+
+```python
+from pynwb.testing.mock.file import mock_NWBFile
+from ndx_anatomical_localization import BrainRegionMasks, Localization
+import numpy as np
+
+nwbfile = mock_NWBFile()
+
+localization = Localization()
+nwbfile.add_lab_meta_data([localization])
+
+masks = BrainRegionMasks(name="source_brain_region_id_masks", description="Pixel masks for primary visual cortex in source image space.")
+masks.add_row(x=10, y=20, brain_region_id=385)
+masks.add_row(x=11, y=20, brain_region_id=385)
+masks.add_row(x=10, y=21, brain_region_id=385)
+
+localization.add_brain_region_masks([masks])
+```
+---
+
+### AtlasRegistration
+`AtlasRegistration` is a `LabMetaData` container that documents the registration *provenance* — i.e., what images, 
+transformations, and landmarks were used to register the imaging data to the atlas. 
+It is separate from the localization results (coordinates, brain region masks) which live under `Localization`.
+
+`AtlasRegistration` requires `source_image` and `registered_image` links and supports optional `atlas_projection`, 
+`affine_transformation`, and `landmarks`.
+
+#### AffineTransformation
+`AffineTransformation` stores a 3×3 affine transformation matrix in homogeneous coordinates, supporting 2D operations: 
+translation, rotation, scaling, and shearing.
+
+```python
+from ndx_anatomical_localization import AffineTransformation
+import numpy as np
+
+affine = AffineTransformation(
+    name="affine_transformation",
+    affine_matrix=np.array([[0.99, -0.14, 50.0],
+                             [0.14,  0.99, 30.0],
+                             [0.0,   0.0,   1.0]]),
+)
+```
+
+#### Landmarks
+`Landmarks` is a `DynamicTable` storing point correspondences between the source image space and the reference atlas. 
+Required columns are `source_x` and `source_y`. Optional columns include `registered_x`/`registered_y` 
+(transformed source coordinates), `reference_x`/`reference_y` (atlas coordinates), `landmark_labels`, and `confidence`.
+
+```python
+from ndx_anatomical_localization import Landmarks
+
+landmarks = Landmarks(name="landmarks", description="Landmark correspondences between FOV and atlas")
+landmarks.add_row(
+    source_x=100.0, 
+    source_y=200.0,
+    reference_x=5500.0, 
+    reference_y=3500.0,
+    landmark_labels="bregma",
+    confidence=0.97,
+)
+landmarks.add_row(
+    source_x=150.0, 
+    source_y=250.0,
+    reference_x=6200.0, 
+    reference_y=3100.0,
+    landmark_labels="lambda",
+    confidence=0.92,
+)
+```
+
+#### Full AtlasRegistration example
+
+`AtlasRegistration` has a fixed name `"atlas_registration"` in the NWB file. It is added directly to the NWBFile via `add_lab_meta_data`, not inside `Localization`.
+
+```python
+from pynwb.testing.mock.file import mock_NWBFile
+from pynwb.base import Images
+from pynwb.image import GrayscaleImage
+import numpy as np
+
+from ndx_anatomical_localization import (
+    AtlasRegistration,
+    AffineTransformation,
+    Landmarks,
+)
+
+nwbfile = mock_NWBFile()
+
+nwbfile.create_processing_module("ophys", "ophys")
+nwbfile.processing["ophys"].add(Images(name="RegistrationImages", description="Images used in atlas registration"))
+image_collection = nwbfile.processing["ophys"].data_interfaces["RegistrationImages"]
+image_collection.add_image(GrayscaleImage(name="SourceFOV", data=np.ones((512, 512)), description="Mean projection of the FOV"))
+image_collection.add_image(GrayscaleImage(name="RegisteredFOV", data=np.ones((512, 512)), description="FOV after affine registration to atlas"))
+image_collection.add_image(GrayscaleImage(name="AtlasProjection", data=np.ones((512, 512)), description="Coronal atlas slice at the registration plane"))
+
+affine = AffineTransformation(
+    name="affine_transformation",
+    affine_matrix=np.array([[0.99, -0.14, 50.0],
+                             [0.14,  0.99, 30.0],
+                             [0.0,   0.0,   1.0]]),
+)
+
+landmarks = Landmarks(name="landmarks", description="Landmark correspondences between FOV and atlas")
+landmarks.add_row(source_x=100.0, source_y=200.0, reference_x=5500.0, reference_y=3500.0, landmark_labels="bregma", confidence=0.97)
+landmarks.add_row(source_x=150.0, source_y=250.0, reference_x=6200.0, reference_y=3100.0, landmark_labels="lambda", confidence=0.92)
+
+registration = AtlasRegistration(
+    source_image=image_collection["SourceFOV"],
+    registered_image=image_collection["RegisteredFOV"],
+    atlas_projection=image_collection["AtlasProjection"],
+    affine_transformation=affine,
+    landmarks=landmarks,
+)
+nwbfile.add_lab_meta_data([registration])
+```
+
 
 ---
 This extension was created using [ndx-template](https://github.com/nwb-extensions/ndx-template).

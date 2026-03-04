@@ -1,5 +1,6 @@
 """Unit and integration tests for the new neurodata type."""
 
+import pytest
 from pynwb import NWBHDF5IO
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
@@ -15,6 +16,10 @@ from ndx_anatomical_localization import (
     Space,
     AllenCCFv3Space,
     Localization,
+    Landmarks,
+    AffineTransformation,
+    BrainRegionMasks,
+    AtlasRegistration,
 )
 
 
@@ -471,3 +476,317 @@ def test_get_coordinates():
     all_coords = coords.get_coordinates()
     expected_all_coords = np.stack([x_data, y_data, z_data], axis=-1)
     npt.assert_array_equal(all_coords, expected_all_coords)
+
+
+# ---------------------------------------------------------------------------
+# Landmarks
+# ---------------------------------------------------------------------------
+
+
+def test_create_landmarks():
+    table = Landmarks(name="landmarks", description="test landmarks")
+    table.add_row(source_x=10.0, source_y=20.0)
+    table.add_row(source_x=30.0, source_y=40.0)
+    assert len(table) == 2
+
+
+def test_create_landmarks_with_optional_columns():
+    table = Landmarks(name="landmarks", description="test landmarks with optional cols")
+    table.add_row(source_x=10.0, source_y=20.0, registered_x=10.5, registered_y=20.5)
+    table.add_row(source_x=30.0, source_y=40.0, registered_x=31.0, registered_y=41.0)
+    assert len(table) == 2
+
+
+def test_landmarks_write_read(tmp_path):
+    nwbfile = mock_NWBFile()
+    nwbfile.create_processing_module("ophys", "ophys")
+    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary images"))
+    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+    image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)), description="registered FOV")
+    )
+
+    landmarks = Landmarks(name="landmarks", description="landmark correspondences")
+    landmarks.add_row(
+        source_x=100.0, source_y=200.0, reference_x=5000.0, reference_y=3000.0,
+        landmark_labels="bregma", confidence=0.95
+    )
+    landmarks.add_row(
+        source_x=150.0, source_y=250.0, reference_x=6000.0, reference_y=4000.0,
+        landmark_labels="lambda", confidence=0.90
+    )
+
+    registration = AtlasRegistration(
+        source_image=image_collection["SourceImage"],
+        registered_image=image_collection["RegisteredImage"],
+        landmarks=landmarks,
+    )
+    nwbfile.add_lab_meta_data([registration])
+
+    with NWBHDF5IO(tmp_path / "test_landmarks.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(tmp_path / "test_landmarks.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
+        read_landmarks = read_registration.landmarks
+
+        assert isinstance(read_landmarks, Landmarks)
+        npt.assert_array_equal(read_landmarks["source_x"].data[:], np.array([100.0, 150.0], dtype=np.float32))
+        npt.assert_array_equal(read_landmarks["source_y"].data[:], np.array([200.0, 250.0], dtype=np.float32))
+        npt.assert_array_equal(read_landmarks["landmark_labels"].data[:], np.array(["bregma", "lambda"]))
+        npt.assert_array_almost_equal(read_landmarks["confidence"].data[:], np.array([0.95, 0.90], dtype=np.float32))
+
+
+# ---------------------------------------------------------------------------
+# AffineTransformation
+# ---------------------------------------------------------------------------
+
+
+def test_create_affine_transformation():
+    matrix = np.eye(3)
+    affine = AffineTransformation(name="affine_transformation", affine_matrix=matrix)
+    npt.assert_array_equal(affine.affine_matrix, matrix)
+
+
+def test_affine_transformation_invalid_shape():
+    with pytest.raises(ValueError, match=r"Affine matrix must be a 3x3 array\. Provided shape: \(4, 4\)"):
+        AffineTransformation(name="affine_transformation", affine_matrix=np.eye(4))
+
+
+def test_affine_transformation_write_read(tmp_path):
+    nwbfile = mock_NWBFile()
+    nwbfile.create_processing_module("ophys", "ophys")
+    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary images"))
+    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+    image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)), description="registered FOV")
+    )
+
+    matrix = np.array([[0.99, -0.14, 50.0], [0.14, 0.99, 30.0], [0.0, 0.0, 1.0]])
+    affine = AffineTransformation(name="affine_transformation", affine_matrix=matrix)
+
+    registration = AtlasRegistration(
+        source_image=image_collection["SourceImage"],
+        registered_image=image_collection["RegisteredImage"],
+        affine_transformation=affine,
+    )
+    nwbfile.add_lab_meta_data([registration])
+
+    with NWBHDF5IO(tmp_path / "test_affine.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(tmp_path / "test_affine.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
+        read_affine = read_registration.affine_transformation
+
+        assert isinstance(read_affine, AffineTransformation)
+        npt.assert_array_almost_equal(read_affine.affine_matrix[:], matrix)
+
+
+# ---------------------------------------------------------------------------
+# BrainRegionMasks
+# ---------------------------------------------------------------------------
+
+
+def test_create_brain_region_masks():
+    masks = BrainRegionMasks(name="source_brain_region_id_masks", description="pixel masks")
+    masks.add_row(x=10, y=20, brain_region_id=1)
+    masks.add_row(x=11, y=20, brain_region_id=1)
+    masks.add_row(x=10, y=21, brain_region_id=2)
+    assert len(masks) == 3
+
+
+def test_brain_region_masks_to_image():
+    masks = BrainRegionMasks(name="masks", description="pixel masks")
+    masks.add_row(x=10, y=20, brain_region_id=1)
+    masks.add_row(x=11, y=20, brain_region_id=1)
+    masks.add_row(x=10, y=21, brain_region_id=2)
+
+    img = masks._to_image(image_height=30, image_width=20)
+
+    assert img.shape == (30, 20)
+    assert img.dtype == np.int32
+    assert img[20, 10] == 1
+    assert img[20, 11] == 1
+    assert img[21, 10] == 2
+    assert img[0, 0] == 0  # background pixel
+
+
+def test_brain_region_masks_write_read(tmp_path):
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    space = AllenCCFv3Space()
+    localization.add_spaces([space])
+
+    src_masks = BrainRegionMasks(name="source_brain_region_id_masks", description="source pixel masks")
+    src_masks.add_row(x=0, y=0, brain_region_id=1)
+    src_masks.add_row(x=1, y=0, brain_region_id=2)
+
+    reg_masks = BrainRegionMasks(name="registered_brain_region_id_masks", description="registered pixel masks")
+    reg_masks.add_row(x=0, y=0, brain_region_id=1)
+    reg_masks.add_row(x=1, y=0, brain_region_id=2)
+
+    localization.add_brain_region_masks([src_masks, reg_masks])
+
+    with NWBHDF5IO(tmp_path / "test_masks.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(tmp_path / "test_masks.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_localization = read_nwbfile.lab_meta_data["localization"]
+
+        read_src = read_localization.brain_region_masks["source_brain_region_id_masks"]
+        read_reg = read_localization.brain_region_masks["registered_brain_region_id_masks"]
+
+        assert isinstance(read_src, BrainRegionMasks)
+        assert isinstance(read_reg, BrainRegionMasks)
+        npt.assert_array_equal(read_src["x"].data[:], np.array([0, 1], dtype=np.uint32))
+        npt.assert_array_equal(read_src["brain_region_id"].data[:], np.array([1, 2], dtype=np.uint32))
+        npt.assert_array_equal(read_reg["y"].data[:], np.array([0, 0], dtype=np.uint32))
+
+
+# ---------------------------------------------------------------------------
+# AtlasRegistration
+# ---------------------------------------------------------------------------
+
+
+def test_atlas_registration_missing_source_image():
+    with pytest.raises(Exception, match="'source_image' must be provided in AtlasRegistration.__init__"):
+        AtlasRegistration()
+
+
+def test_atlas_registration_without_registered_image():
+    """Creating AtlasRegistration without registered_image is allowed."""
+    source_img = GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source")
+    registration = AtlasRegistration(source_image=source_img)
+    assert registration.source_image is source_img
+    assert registration.registered_image is None
+
+
+def test_atlas_registration_with_image_write_read(tmp_path):
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    nwbfile.create_processing_module("ophys", "ophys")
+    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary"))
+    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+    image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)) * 2, description="registered FOV")
+    )
+    image_collection.add_image(GrayscaleImage(name="AtlasProjection", data=np.ones((5, 5)) * 3, description="atlas"))
+
+    space = AllenCCFv3Space()
+    localization.add_spaces([space])
+
+    matrix = np.eye(3)
+    affine = AffineTransformation(name="affine_transformation", affine_matrix=matrix)
+
+    registration = AtlasRegistration(
+        source_image=image_collection["SourceImage"],
+        registered_image=image_collection["RegisteredImage"],
+        atlas_projection=image_collection["AtlasProjection"],
+        affine_transformation=affine,
+    )
+    nwbfile.add_lab_meta_data([registration])
+
+    with NWBHDF5IO(tmp_path / "test_atlas_registration.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(tmp_path / "test_atlas_registration.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_src_image = read_nwbfile.processing["ophys"]["SummaryImages"]["SourceImage"]
+        read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
+
+        assert isinstance(read_registration, AtlasRegistration)
+        assert read_registration.source_image is read_src_image
+        assert isinstance(read_registration.affine_transformation, AffineTransformation)
+        npt.assert_array_almost_equal(read_registration.affine_transformation.affine_matrix[:], np.eye(3))
+
+
+def test_atlas_registration_with_landmarks_write_read(tmp_path):
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    nwbfile.create_processing_module("ophys", "ophys")
+    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="summary"))
+    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
+    image_collection.add_image(GrayscaleImage(name="SourceImage", data=np.ones((5, 5)), description="source FOV"))
+    image_collection.add_image(
+        GrayscaleImage(name="RegisteredImage", data=np.ones((5, 5)) * 2, description="registered FOV")
+    )
+
+    landmarks = Landmarks(name="landmarks", description="registration landmarks")
+    landmarks.add_row(source_x=50.0, source_y=100.0, reference_x=4000.0, reference_y=2000.0)
+
+    src_masks = BrainRegionMasks(name="source_brain_region_id_masks", description="source masks")
+    src_masks.add_row(x=0, y=0, brain_region_id=315)
+
+    registration = AtlasRegistration(
+        source_image=image_collection["SourceImage"],
+        registered_image=image_collection["RegisteredImage"],
+        landmarks=landmarks,
+    )
+    nwbfile.add_lab_meta_data([registration])
+    localization.add_brain_region_masks([src_masks])
+
+    with NWBHDF5IO(tmp_path / "test_atlas_registration_plane.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(tmp_path / "test_atlas_registration_plane.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_localization = read_nwbfile.lab_meta_data["localization"]
+        read_registration = read_nwbfile.lab_meta_data["atlas_registration"]
+
+        assert isinstance(read_registration, AtlasRegistration)
+        assert isinstance(read_registration.landmarks, Landmarks)
+        npt.assert_array_equal(
+            read_registration.landmarks["source_x"].data[:],
+            np.array([50.0], dtype=np.float32),
+        )
+
+        read_src = read_localization.brain_region_masks["source_brain_region_id_masks"]
+        assert isinstance(read_src, BrainRegionMasks)
+        npt.assert_array_equal(
+            read_src["brain_region_id"].data[:],
+            np.array([315], dtype=np.uint32),
+        )
+
+
+def test_brain_region_masks_directly_under_localization(tmp_path):
+    """BrainRegionMasks can be stored under Localization without any AtlasRegistration."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    masks = BrainRegionMasks(name="VISp_masks", description="Visual cortex pixel masks")
+    masks.add_row(x=10, y=20, brain_region_id=385)
+    masks.add_row(x=11, y=20, brain_region_id=385)
+    masks.add_row(x=10, y=21, brain_region_id=394)
+
+    localization.add_brain_region_masks([masks])
+
+    with NWBHDF5IO(tmp_path / "test_brain_region_masks_direct.nwb", "w") as io:
+        io.write(nwbfile)
+
+    with NWBHDF5IO(tmp_path / "test_brain_region_masks_direct.nwb", "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        read_localization = read_nwbfile.lab_meta_data["localization"]
+
+        read_masks = read_localization.brain_region_masks["VISp_masks"]
+        assert isinstance(read_masks, BrainRegionMasks)
+        assert len(read_masks) == 3
+        npt.assert_array_equal(read_masks["x"].data[:], np.array([10, 11, 10], dtype=np.uint32))
+        npt.assert_array_equal(read_masks["y"].data[:], np.array([20, 20, 21], dtype=np.uint32))
+        npt.assert_array_equal(
+            read_masks["brain_region_id"].data[:],
+            np.array([385, 385, 394], dtype=np.uint32),
+        )

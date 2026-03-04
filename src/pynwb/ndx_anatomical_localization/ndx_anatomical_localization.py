@@ -114,6 +114,117 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
             extent=np.array([13200.0, 8000.0, 11400.0]),
         )
 
+TempBrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localization")
+
+
+@register_class("BrainRegionMasks", "ndx-anatomical-localization")
+class BrainRegionMasks(TempBrainRegionMasks):
+
+    def _to_image(self, image_height: int, image_width: int) -> np.ndarray:
+        """Reconstruct a 2D brain region ID array from the flat (x, y, brain_region_id) table.
+
+        Parameters
+        ----------
+        image_height : int
+            Height of the output array in pixels.
+        image_width : int
+            Width of the output array in pixels.
+
+        Returns
+        -------
+        np.ndarray of shape (image_height, image_width), dtype int32
+            Each pixel contains the brain_region_id at that location, or 0 where no mask entry exists.
+        """
+        img = np.zeros((image_height, image_width), dtype=np.int32)
+        xs = self["x"].data[:]
+        ys = self["y"].data[:]
+        ids = self["brain_region_id"].data[:]
+        img[ys, xs] = ids
+        return img
+
+
+Landmarks = get_class("Landmarks", "ndx-anatomical-localization")
+
+# AffineTransformation: custom class adds shape validation on the matrix.
+TempAffineTransformation = get_class("AffineTransformation", "ndx-anatomical-localization")
+
+
+@register_class("AffineTransformation", "ndx-anatomical-localization")
+class AffineTransformation(TempAffineTransformation):
+    """A 3x3 affine transformation matrix in homogeneous coordinates.
+
+    Supports 2D operations: translation, rotation, scaling, and shearing.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object"},
+        {
+            "name": "affine_matrix",
+            "type": "array_data",
+            "doc": "3x3 affine transformation matrix in homogeneous coordinates",
+        },
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, **kwargs):
+        affine_matrix = np.asarray(kwargs["affine_matrix"], dtype=np.float64)
+        if affine_matrix.shape != (3, 3):
+            raise ValueError(
+                f"Affine matrix must be a 3x3 array. Provided shape: {affine_matrix.shape}"
+            )
+        kwargs["affine_matrix"] = affine_matrix
+        super().__init__(**kwargs)
+
+
+# AtlasRegistration: custom class validates that source_image and registered_image are provided.
+TempAtlasRegistration = get_class("AtlasRegistration", "ndx-anatomical-localization")
+
+
+@register_class("AtlasRegistration", "ndx-anatomical-localization")
+class AtlasRegistration(TempAtlasRegistration):
+
+    @docval(
+        {
+            "name": "source_image",
+            "type": Image,
+            "doc": "Image representing the source FOV.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "registered_image",
+            "type": Image,
+            "doc": "Image representing the registered FOV.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "atlas_projection",
+            "type": Image,
+            "doc": "The atlas projection image used as reference in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "affine_transformation",
+            "type": AffineTransformation,
+            "doc": "A spatial transformation used in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "landmarks",
+            "type": Landmarks,
+            "doc": "Landmarks used in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, **kwargs):
+        if kwargs.get("source_image") is None:
+            raise ValueError("'source_image' must be provided in AtlasRegistration.__init__")
+        super().__init__(**kwargs)
+
 
 # Get these AFTER Space and AllenCCFv3Space are registered
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
@@ -186,12 +297,6 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
             "name": "brain_region",
             "type": ("array_data", "data"),
             "doc": "2D array of brain region names for each pixel",
-            "default": None,
-        },
-        {
-            "name": "brain_region_id",
-            "type": ("array_data", "data"),
-            "doc": "2D array of brain region IDs for each pixel (corresponding to atlas ontology)",
             "default": None,
         },
         allow_positional=AllowPositional.ERROR,
