@@ -175,8 +175,58 @@ class AffineTransformation(TempAffineTransformation):
         super().__init__(**kwargs)
 
 
-# Get AnatomicalCoordinatesTable and AnatomicalCoordinatesImage AFTER Space is registered.
-# AtlasRegistration links to AnatomicalCoordinatesImage, so these must be registered first.
+# AtlasRegistration: custom class validates that source_image and registered_image are provided.
+TempAtlasRegistration = get_class("AtlasRegistration", "ndx-anatomical-localization")
+
+
+@register_class("AtlasRegistration", "ndx-anatomical-localization")
+class AtlasRegistration(TempAtlasRegistration):
+
+    @docval(
+        {
+            "name": "source_image",
+            "type": Image,
+            "doc": "Image representing the source FOV.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "registered_image",
+            "type": Image,
+            "doc": "Image representing the registered FOV.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "atlas_projection",
+            "type": Image,
+            "doc": "The atlas projection image used as reference in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "affine_transformation",
+            "type": AffineTransformation,
+            "doc": "A spatial transformation used in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        {
+            "name": "landmarks",
+            "type": Landmarks,
+            "doc": "Landmarks used in the registration.",
+            "default": None,
+            "allow_none": True,
+        },
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, **kwargs):
+        if kwargs.get("source_image") is None:
+            raise ValueError("'source_image' must be provided in AtlasRegistration.__init__")
+        super().__init__(**kwargs)
+
+
+# Get these AFTER Space and AllenCCFv3Space are registered
 TempAnatomicalCoordinatesTable = get_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 TempAnatomicalCoordinatesImage = get_class("AnatomicalCoordinatesImage", "ndx-anatomical-localization")
 Localization = get_class("Localization", "ndx-anatomical-localization")
@@ -291,70 +341,3 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
             return (self.x[i, j], self.y[i, j], self.z[i, j])
         else:
             return np.stack([self.x[:], self.y[:], self.z[:]], axis=-1)
-
-
-# AtlasRegistration: fetched AFTER AnatomicalCoordinatesImage and BrainRegionMasks are registered,
-# since the schema links to both.
-TempAtlasRegistration = get_class("AtlasRegistration", "ndx-anatomical-localization")
-
-
-@register_class("AtlasRegistration", "ndx-anatomical-localization")
-class AtlasRegistration(TempAtlasRegistration):
-
-    @docval(
-        {
-            "name": "source_image",
-            "type": Image,
-            "doc": "Image representing the source FOV.",
-            "default": None,
-            "allow_none": True,
-        },
-        {
-            "name": "registered_image",
-            "type": Image,
-            "doc": "Image representing the registered FOV.",
-            "default": None,
-            "allow_none": True,
-        },
-        {
-            "name": "atlas_projection",
-            "type": Image,
-            "doc": "The atlas projection image used as reference in the registration.",
-            "default": None,
-            "allow_none": True,
-        },
-        {
-            "name": "affine_transformation",
-            "type": AffineTransformation,
-            "doc": "A spatial transformation used in the registration.",
-            "default": None,
-            "allow_none": True,
-        },
-        {
-            "name": "landmarks",
-            "type": Landmarks,
-            "doc": "Landmarks used in the registration.",
-            "default": None,
-            "allow_none": True,
-        },
-        {
-            "name": "anatomical_coordinates_images",
-            "type": (list, AnatomicalCoordinatesImage),
-            "doc": "AnatomicalCoordinatesImage objects produced by this registration.",
-            "default": None,
-            "allow_none": True,
-        },
-        {
-            "name": "brain_region_masks",
-            "type": (list, BrainRegionMasks),
-            "doc": "BrainRegionMasks objects produced by this registration.",
-            "default": None,
-            "allow_none": True,
-        },
-        allow_positional=AllowPositional.ERROR,
-    )
-    def __init__(self, **kwargs):
-        if kwargs.get("source_image") is None:
-            raise ValueError("'source_image' must be provided in AtlasRegistration.__init__")
-        super().__init__(**kwargs)
-

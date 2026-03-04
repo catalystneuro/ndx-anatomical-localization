@@ -318,10 +318,6 @@ from ndx_anatomical_localization import (
     AtlasRegistration,
     AffineTransformation,
     Landmarks,
-    AnatomicalCoordinatesImage,
-    BrainRegionMasks,
-    AllenCCFv3Space,
-    Localization,
 )
 
 nwbfile = mock_NWBFile()
@@ -344,40 +340,12 @@ landmarks = Landmarks(name="landmarks", description="Landmark correspondences be
 landmarks.add_row(source_x=100.0, source_y=200.0, reference_x=5500.0, reference_y=3500.0, landmark_labels="bregma", confidence=0.97)
 landmarks.add_row(source_x=150.0, source_y=250.0, reference_x=6200.0, reference_y=3100.0, landmark_labels="lambda", confidence=0.92)
 
-# Registration results stored under Localization
-space = AllenCCFv3Space()
-coords = AnatomicalCoordinatesImage(
-    name="RegisteredImageAnatomicalCoordinates",
-    space=space,
-    method="manual annotation",
-    image=image_collection["RegisteredFOV"],
-    x=np.zeros((512, 512), dtype=np.float32),
-    y=np.zeros((512, 512), dtype=np.float32),
-    z=np.zeros((512, 512), dtype=np.float32),
-)
-# Region masks in source imaging space: atlas region boundaries projected back onto the FOV
-source_region_masks = BrainRegionMasks(
-    name="SourceBrainRegionMasks",
-    description="Allen CCF region IDs projected onto the source FOV (source imaging space)",
-)
-source_region_masks.add_row(x=0, y=0, brain_region_id=385)  # VISp
-source_region_masks.add_row(x=1, y=0, brain_region_id=394)  # VISpm
-
-localization = Localization()
-localization.add_spaces(space)
-localization.add_anatomical_coordinates_images(coords)
-localization.add_brain_region_masks(source_region_masks)
-nwbfile.add_lab_meta_data([localization])
-
-# Link registration provenance to its results
 registration = AtlasRegistration(
     source_image=image_collection["SourceFOV"],
     registered_image=image_collection["RegisteredFOV"],
     atlas_projection=image_collection["AtlasProjection"],
     affine_transformation=affine,
     landmarks=landmarks,
-    anatomical_coordinates_images=[coords],
-    brain_region_masks=[source_region_masks],
 )
 nwbfile.add_lab_meta_data([registration])
 ```

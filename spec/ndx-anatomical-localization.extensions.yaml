@@ -303,12 +303,6 @@ groups:
         name: atlas_projection
         quantity: "?"
         doc: "The atlas projection image used as reference in the registration."
-      - target_type: AnatomicalCoordinatesImage
-        quantity: "*"
-        doc: "AnatomicalCoordinatesImage objects produced by this registration, linking pixels to atlas coordinates."
-      - target_type: BrainRegionMasks
-        quantity: "*"
-        doc: "BrainRegionMasks objects produced by this registration, assigning atlas region IDs to pixels."
     groups:
       - neurodata_type_inc: AffineTransformation
         quantity: "?"
