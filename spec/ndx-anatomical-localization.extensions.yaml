@@ -133,13 +133,13 @@ groups:
         doc: "The space in which the coordinates are defined"
         name: space
       - target_type: Image
-        quantity: "?"
-        doc: "The image associated with the coordinates"
+        quantity: 1
+        doc: "The reference image (e.g. mean or max projection) on which the coordinate map is based"
         name: image
-      - target_type: ImagingPlane
+      - target_type: ImageSeries
         quantity: "?"
-        doc: "The imaging plane associated with the coordinates"
-        name: imaging_plane
+        doc: "The imaging series (OnePhotonSeries or TwoPhotonSeries) that this coordinate map applies to"
+        name: localized_entity
     attributes:
       - name: method
         doc: "The method used to determine the coordinates"
