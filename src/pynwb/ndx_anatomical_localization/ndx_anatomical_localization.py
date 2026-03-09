@@ -2,7 +2,7 @@ import numpy as np
 
 from hdmf.common import DynamicTable
 from pynwb.image import Image
-from pynwb.ophys import ImagingPlane
+from pynwb.ophys import OnePhotonSeries, TwoPhotonSeries
 from hdmf.utils import get_docval, AllowPositional
 
 from pynwb import get_class, register_class, docval
@@ -271,12 +271,17 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
         {"name": "description", "type": str, "doc": "description of the NWB object", "default": None},
         {"name": "space", "type": Space, "doc": "space of the image"},
         {"name": "method", "type": str, "doc": "method of the image"},
-        {"name": "image", "type": Image, "doc": "The image associated with the coordinates", "default": None},
         {
-            "name": "imaging_plane",
-            "type": ImagingPlane,
-            "doc": "The imaging plane associated with the coordinates",
+            "name": "image",
+            "type": Image,
+            "doc": "The reference image (e.g. mean or max projection) on which the coordinate map is based",
+        },
+        {
+            "name": "localized_entity",
+            "type": (OnePhotonSeries, TwoPhotonSeries),
+            "doc": "The imaging series (OnePhotonSeries or TwoPhotonSeries) that this coordinate map applies to",
             "default": None,
+            "allow_none": True,
         },
         {
             "name": "x",
@@ -303,25 +308,15 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
     )
     def __init__(self, **kwargs):
         image = kwargs.get("image")
-        imaging_plane = kwargs.get("imaging_plane")
-
         x = kwargs["x"]
         y = kwargs["y"]
         z = kwargs["z"]
-        if image is not None and imaging_plane is not None:
+        if x.shape != image.data.shape or y.shape != image.data.shape or z.shape != image.data.shape:
             raise ValueError(
-                'Only one of "image" or "imaging_plane" can be provided in AnatomicalCoordinatesImage.__init__ '
+                f'"x", "y", and "z" must have the same shape as the image data. '
+                f"x.shape: {x.shape}, y.shape: {y.shape}, z.shape: {z.shape}, "
+                f"image.data.shape: {image.data.shape}"
             )
-        if image is None and imaging_plane is None:
-            raise ValueError('"image" or "imaging_plane" must be provided in AnatomicalCoordinatesImage.__init__ ')
-        if image is not None:
-            # verify that x, y, z have the same shape as the image data
-            if x.shape != image.data.shape or y.shape != image.data.shape or z.shape != image.data.shape:
-                raise ValueError(
-                    f'"x", "y", and "z" must have the same shape as the image data. '
-                    f"x.shape: {x.shape}, y.shape: {y.shape}, z.shape: {z.shape}, "
-                    f"image.data.shape: {image.data.shape}"
-                )
         super().__init__(**kwargs)
 
     def get_coordinates(self, i=None, j=None):
