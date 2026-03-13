@@ -72,9 +72,9 @@ You can also add custom columns to this table, for example to express certainty 
 For imaging data, you can use `AnatomicalCoordinatesImage` to store anatomical coordinates as 2D arrays that map pixels in an image to anatomical locations.
 This is useful when you want to localize a field of view or register imaging data to a reference atlas.
 
-Each `AnatomicalCoordinatesImage` must be associated with either:
-- An `ImagingPlane` object (for optical physiology experiments)
-- An `Image` object (for static reference images)
+Each `AnatomicalCoordinatesImage` requires:
+- An `Image` object (required) — the reference image (e.g. mean or max projection) on which the coordinate map is based
+- A `localized_entity` (optional) — a `OnePhotonSeries` or `TwoPhotonSeries` that this coordinate map applies to
 
 The x, y, and z datasets store 2D arrays of coordinates for each pixel in the image, x[i, j], y[i, j], z[i, j] give the anatomical coordinates location for pixel (i, j).
 The `get_coordinates()` function return the image with anatomical coordinates per pixel:
@@ -160,78 +160,49 @@ table = AnatomicalCoordinatesTable(
 localization.add_anatomical_coordinates_tables([table])
 ```
 
-#### Example with ImagingPlane
+#### Example with image and localized_entity
 
 ```python
 from pynwb.testing.mock.file import mock_NWBFile
-from pynwb.testing.mock.ophys import mock_ImagingPlane
-import numpy as np
-
-from ndx_anatomical_localization import AnatomicalCoordinatesImage, Space, Localization
-
-nwbfile = mock_NWBFile()
-
-localization = Localization()
-nwbfile.add_lab_meta_data([localization])
-
-imaging_plane = mock_ImagingPlane(nwbfile=nwbfile)
-
-space = Space.get_predefined_space("CCFv3")
-localization.add_spaces([space])
-
-image_coordinates = AnatomicalCoordinatesImage(
-    name="MyAnatomicalLocalization",
-    imaging_plane=imaging_plane,
-    method="manual registration",
-    space=space,
-    x=np.ones((5, 5)),
-    y=np.ones((5, 5)) * 2.0,
-    z=np.ones((5, 5)) * 3.0,
-    brain_region=np.array([["CA1"] * 5] * 5),
-)
-
-localization.add_anatomical_coordinates_images([image_coordinates])
-```
-
-#### Example with Image
-
-```python
-from pynwb.testing.mock.file import mock_NWBFile
+from pynwb.testing.mock.ophys import mock_TwoPhotonSeries
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
 import numpy as np
 
-from ndx_anatomical_localization import AnatomicalCoordinatesImage, Space, Localization
+from ndx_anatomical_localization import AnatomicalCoordinatesImage, AllenCCFv3Space, Localization
 
 nwbfile = mock_NWBFile()
 
 localization = Localization()
 nwbfile.add_lab_meta_data([localization])
 
-# Create an image to localize
-if "ophys" not in nwbfile.processing:
-    nwbfile.create_processing_module("ophys", "ophys")
-
-nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="Summary images container"))
+# Create a reference image (e.g. mean projection of the FOV)
+nwbfile.create_processing_module("ophys", "ophys")
+nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="Summary images"))
 image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
-image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
+image_collection.add_image(GrayscaleImage(name="MeanImage", data=np.ones((512, 512)), description="Mean projection"))
 
-space = Space.get_predefined_space("CCFv3")
+# The recording series this coordinate map applies to
+two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+
+space = AllenCCFv3Space()
 localization.add_spaces([space])
 
 image_coordinates = AnatomicalCoordinatesImage(
     name="MyAnatomicalLocalization",
-    image=image_collection["MyImage"],
+    image=image_collection["MeanImage"],
+    localized_entity=two_photon_series,
     method="manual registration",
     space=space,
-    x=np.ones((5, 5)),
-    y=np.ones((5, 5)) * 2.0,
-    z=np.ones((5, 5)) * 3.0,
-    brain_region=np.array([["CA1"] * 5] * 5),
+    x=np.ones((512, 512)),
+    y=np.ones((512, 512)) * 2.0,
+    z=np.ones((512, 512)) * 3.0,
+    brain_region=np.full((512, 512), "VISp"),
 )
 
 localization.add_anatomical_coordinates_images([image_coordinates])
 ```
+
 #### Example with BrainRegionMasks
 
 ```python
