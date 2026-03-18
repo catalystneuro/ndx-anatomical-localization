@@ -16,7 +16,7 @@ from ndx_anatomical_localization import (
     Space,
     AllenCCFv3Space,
     D99v2Space,
-    NMTv2symSpace,
+    NMTv2Space,
     MEBRAINSSpace,
     Localization,
     Landmarks,
@@ -266,16 +266,16 @@ def test_d99v2_space_write_read(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# NMTv2symSpace
+# NMTv2Space
 # ---------------------------------------------------------------------------
 
 
 def test_create_nmtv2sym_space():
-    """Test creating NMTv2symSpace directly."""
-    space = NMTv2symSpace()
+    """Test creating NMTv2Space directly."""
+    space = NMTv2Space()
 
-    assert space.name == "NMTv2sym"
-    assert space.space_name == "NMTv2sym"
+    assert space.name == "NMTv2"
+    assert space.space_name == "NMTv2"
     assert space.orientation == "RAS"
     assert space.units == "mm"
     assert space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
@@ -283,23 +283,23 @@ def test_create_nmtv2sym_space():
 
 
 def test_create_nmtv2sym_space_custom_name():
-    """Test creating NMTv2symSpace with custom name."""
-    space = NMTv2symSpace(name="my_nmt_space")
+    """Test creating NMTv2Space with custom name."""
+    space = NMTv2Space(name="my_nmt_space")
 
     assert space.name == "my_nmt_space"
-    assert space.space_name == "NMTv2sym"
+    assert space.space_name == "NMTv2"
     assert space.orientation == "RAS"
 
 
 def test_nmtv2sym_space_write_read(tmp_path):
-    """Test that NMTv2symSpace type is preserved through write/read cycle."""
+    """Test that NMTv2Space type is preserved through write/read cycle."""
     nwbfile = mock_NWBFile()
     localization = Localization()
     nwbfile.add_lab_meta_data([localization])
 
     electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
 
-    space = NMTv2symSpace()
+    space = NMTv2Space()
     localization.add_spaces([space])
 
     table = AnatomicalCoordinatesTable(
@@ -320,8 +320,8 @@ def test_nmtv2sym_space_write_read(tmp_path):
     read_localization = read_nwbfile.lab_meta_data["localization"]
     read_table = read_localization.anatomical_coordinates_tables["NMTLocalization"]
 
-    assert isinstance(read_table.space, NMTv2symSpace)
-    assert read_table.space.space_name == "NMTv2sym"
+    assert isinstance(read_table.space, NMTv2Space)
+    assert read_table.space.space_name == "NMTv2"
     assert read_table.space.orientation == "RAS"
     assert read_table.space.units == "mm"
     assert read_table.space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."

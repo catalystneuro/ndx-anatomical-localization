@@ -111,7 +111,7 @@ groups:
         dtype: text
         value: RAS
         doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
-  - neurodata_type_def: NMTv2symSpace
+  - neurodata_type_def: NMTv2Space
     neurodata_type_inc: Space
     doc:
       "The NIMH Macaque Template version 2.0 symmetric (Jung et al. 2021).
@@ -120,8 +120,8 @@ groups:
     attributes:
       - name: space_name
         dtype: text
-        value: NMTv2sym
-        doc: "Name of the space (fixed to NMTv2sym)"
+        value: NMTv2
+        doc: "Name of the space (fixed to NMTv2)"
       - name: origin
         dtype: text
         value: "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."

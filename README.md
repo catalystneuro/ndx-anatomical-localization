@@ -66,6 +66,13 @@ The `AllenCCFv3Space` instance can be programmatically identified using `isinsta
 
 Three canonical macaque atlas spaces are also available as predefined classes. All use RAS orientation and millimeter units.
 
+These atlases differ not only in origin but in the **alignment convention** that defines the orientation of the horizontal plane through the brain. This distinction matters because a point at the same (x, y, z) coordinate maps to a different physical location depending on which convention is used:
+
+- **AC-PC alignment**: The horizontal plane passes through the anterior commissure (AC) and the posterior commissure (PC). This is defined by internal brain landmarks.
+- **Horsley-Clarke alignment**: The horizontal plane is defined by the ear bars and the infraorbital ridge of the stereotaxic frame. This is defined by external skull landmarks. The Horsley-Clarke plane is typically tilted several degrees relative to the AC-PC plane.
+
+Each predefined space class hardcodes the correct origin and alignment convention, so users don't need to specify these details manually.
+
 **D99v2Space** (Reveley et al. 2017; Saleem et al. 2021): Origin at the anterior commissure, horizontal plane aligned to the AC-PC line.
 
 ```python
@@ -74,12 +81,12 @@ from ndx_anatomical_localization import D99v2Space
 space = D99v2Space()
 ```
 
-**NMTv2symSpace** (Jung et al. 2021): Origin at ear bar zero (intersection of the midsagittal plane and interaural line), horizontal plane aligned to the Horsley-Clarke stereotaxic convention.
+**NMTv2Space** (Jung et al. 2021): Origin at ear bar zero (intersection of the midsagittal plane and interaural line), horizontal plane aligned to the Horsley-Clarke stereotaxic convention.
 
 ```python
-from ndx_anatomical_localization import NMTv2symSpace
+from ndx_anatomical_localization import NMTv2Space
 
-space = NMTv2symSpace()
+space = NMTv2Space()
 ```
 
 **MEBRAINSSpace** (Balan et al. 2024): Origin at the anterior commissure, horizontal plane approximately aligned to the Horsley-Clarke convention.

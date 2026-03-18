@@ -130,11 +130,11 @@ class D99v2Space(TempD99v2Space):
         )
 
 
-TempNMTv2symSpace = get_class("NMTv2symSpace", "ndx-anatomical-localization")
+TempNMTv2Space = get_class("NMTv2Space", "ndx-anatomical-localization")
 
 
-@register_class("NMTv2symSpace", "ndx-anatomical-localization")
-class NMTv2symSpace(TempNMTv2symSpace):
+@register_class("NMTv2Space", "ndx-anatomical-localization")
+class NMTv2Space(TempNMTv2Space):
     """
     The NIMH Macaque Template version 2.0 symmetric (Jung et al. 2021).
 
@@ -143,13 +143,13 @@ class NMTv2symSpace(TempNMTv2symSpace):
     """
 
     @docval(
-        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "NMTv2sym"},
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "NMTv2"},
         allow_positional=AllowPositional.ERROR,
     )
-    def __init__(self, name="NMTv2sym"):
+    def __init__(self, name="NMTv2"):
         super().__init__(
             name=name,
-            space_name="NMTv2sym",
+            space_name="NMTv2",
             origin="Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention.",
             units="mm",
             orientation="RAS",
