@@ -1,7 +1,7 @@
 """Unit and integration tests for the new neurodata type."""
 
 import pytest
-from pynwb import NWBHDF5IO
+from pynwb import NWBHDF5IO, read_nwb
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
 from pynwb.testing.mock.file import mock_NWBFile
@@ -15,6 +15,9 @@ from ndx_anatomical_localization import (
     AnatomicalCoordinatesTable,
     Space,
     AllenCCFv3Space,
+    D99v2Space,
+    NMTv2symSpace,
+    MEBRAINSSpace,
     Localization,
     Landmarks,
     AffineTransformation,
@@ -197,6 +200,195 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
             np.ones((5, 5)) * 3.0,
         )
         npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
+
+
+# ---------------------------------------------------------------------------
+# D99v2Space
+# ---------------------------------------------------------------------------
+
+
+def test_create_d99v2_space():
+    """Test creating D99v2Space directly."""
+    space = D99v2Space()
+
+    assert space.name == "D99v2"
+    assert space.space_name == "D99v2"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure)."
+    assert space.extent is None
+
+
+def test_create_d99v2_space_custom_name():
+    """Test creating D99v2Space with custom name."""
+    space = D99v2Space(name="my_d99_space")
+
+    assert space.name == "my_d99_space"
+    assert space.space_name == "D99v2"
+    assert space.orientation == "RAS"
+
+
+def test_d99v2_space_write_read(tmp_path):
+    """Test that D99v2Space type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = D99v2Space()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="D99Localization",
+        target=electrodes_table,
+        description="D99 coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_d99.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_d99.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["D99Localization"]
+
+    assert isinstance(read_table.space, D99v2Space)
+    assert read_table.space.space_name == "D99v2"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure)."
+    assert read_table.space.extent is None
+
+
+# ---------------------------------------------------------------------------
+# NMTv2symSpace
+# ---------------------------------------------------------------------------
+
+
+def test_create_nmtv2sym_space():
+    """Test creating NMTv2symSpace directly."""
+    space = NMTv2symSpace()
+
+    assert space.name == "NMTv2sym"
+    assert space.space_name == "NMTv2sym"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert space.extent is None
+
+
+def test_create_nmtv2sym_space_custom_name():
+    """Test creating NMTv2symSpace with custom name."""
+    space = NMTv2symSpace(name="my_nmt_space")
+
+    assert space.name == "my_nmt_space"
+    assert space.space_name == "NMTv2sym"
+    assert space.orientation == "RAS"
+
+
+def test_nmtv2sym_space_write_read(tmp_path):
+    """Test that NMTv2symSpace type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = NMTv2symSpace()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="NMTLocalization",
+        target=electrodes_table,
+        description="NMT coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_nmt.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_nmt.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["NMTLocalization"]
+
+    assert isinstance(read_table.space, NMTv2symSpace)
+    assert read_table.space.space_name == "NMTv2sym"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert read_table.space.extent is None
+
+
+# ---------------------------------------------------------------------------
+# MEBRAINSSpace
+# ---------------------------------------------------------------------------
+
+
+def test_create_mebrains_space():
+    """Test creating MEBRAINSSpace directly."""
+    space = MEBRAINSSpace()
+
+    assert space.name == "MEBRAINS"
+    assert space.space_name == "MEBRAINS"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == "Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention."
+    assert space.extent is None
+
+
+def test_create_mebrains_space_custom_name():
+    """Test creating MEBRAINSSpace with custom name."""
+    space = MEBRAINSSpace(name="my_mebrains_space")
+
+    assert space.name == "my_mebrains_space"
+    assert space.space_name == "MEBRAINS"
+    assert space.orientation == "RAS"
+
+
+def test_mebrains_space_write_read(tmp_path):
+    """Test that MEBRAINSSpace type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = MEBRAINSSpace()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="MEBRAINSLocalization",
+        target=electrodes_table,
+        description="MEBRAINS coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_mebrains.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_mebrains.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["MEBRAINSLocalization"]
+
+    assert isinstance(read_table.space, MEBRAINSSpace)
+    assert read_table.space.space_name == "MEBRAINS"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == "Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention."
+    assert read_table.space.extent is None
 
 
 def test_create_anatomical_coordinates_image_w_two_photon_series():

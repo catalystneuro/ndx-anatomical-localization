@@ -9,16 +9,6 @@ from pynwb import get_class, register_class, docval
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
 
-PREDEFINED_SPACES = {
-    "CCFv3": {
-        "name": "space",
-        "space_name": "CCFv3",
-        "origin": "In the middle of the anterior commissure",
-        "units": "um",
-        "orientation": "RAS",
-    }
-}
-
 
 @register_class("Space", "ndx-anatomical-localization")
 class Space(TempSpace):
@@ -113,6 +103,84 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
             orientation="PIR",
             extent=np.array([13200.0, 8000.0, 11400.0]),
         )
+
+TempD99v2Space = get_class("D99v2Space", "ndx-anatomical-localization")
+
+
+@register_class("D99v2Space", "ndx-anatomical-localization")
+class D99v2Space(TempD99v2Space):
+    """
+    The D99 macaque brain atlas version 2.0 (Reveley et al. 2017; Saleem et al. 2021).
+
+    This canonical space uses RAS orientation (positive x=Right, positive y=Anterior,
+    positive z=Superior) with millimeter units. The origin (0,0,0) is at the anterior commissure.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "D99v2"},
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, name="D99v2"):
+        super().__init__(
+            name=name,
+            space_name="D99v2",
+            origin="Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure).",
+            units="mm",
+            orientation="RAS",
+        )
+
+
+TempNMTv2symSpace = get_class("NMTv2symSpace", "ndx-anatomical-localization")
+
+
+@register_class("NMTv2symSpace", "ndx-anatomical-localization")
+class NMTv2symSpace(TempNMTv2symSpace):
+    """
+    The NIMH Macaque Template version 2.0 symmetric (Jung et al. 2021).
+
+    This canonical space uses RAS orientation (positive x=Right, positive y=Anterior,
+    positive z=Superior) with millimeter units. The origin (0,0,0) is at ear bar zero.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "NMTv2sym"},
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, name="NMTv2sym"):
+        super().__init__(
+            name=name,
+            space_name="NMTv2sym",
+            origin="Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention.",
+            units="mm",
+            orientation="RAS",
+        )
+
+
+TempMEBRAINSSpace = get_class("MEBRAINSSpace", "ndx-anatomical-localization")
+
+
+@register_class("MEBRAINSSpace", "ndx-anatomical-localization")
+class MEBRAINSSpace(TempMEBRAINSSpace):
+    """
+    The MEBRAINS macaque brain atlas version 1.0 (Balan et al. 2024).
+
+    This canonical space uses RAS orientation (positive x=Right, positive y=Anterior,
+    positive z=Superior) with millimeter units. The origin (0,0,0) is at the anterior commissure.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "MEBRAINS"},
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, name="MEBRAINS"):
+        super().__init__(
+            name=name,
+            space_name="MEBRAINS",
+            origin="Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention.",
+            units="mm",
+            orientation="RAS",
+        )
+
 
 TempBrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localization")
 

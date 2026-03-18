@@ -30,8 +30,8 @@ keywords = [
     'ndx-extension',
 ]
 dependencies = [
-    "pynwb>=2.8.0",
-    "hdmf>=3.14.1",
+    "pynwb>=3.1.3",
+    "hdmf>=4.1.2",
 ]
 
 # TODO: add URLs before release
@@ -112,14 +112,8 @@ line-length = 120
 max-complexity = 17
 
 [dependency-groups]
-# Minimum versions for testing compatibility
-min = [
-    "pynwb==2.8.0",
-    "hdmf==3.14.5",
-]
-
 # Development dependencies for testing, linting, and documentation
-dev = [
+test = [
     "black==24.4.2",
     "codespell==2.3.0",
     "coverage==7.5.4",

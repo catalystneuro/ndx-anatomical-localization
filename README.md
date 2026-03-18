@@ -62,6 +62,36 @@ space = AllenCCFv3Space()
 
 The `AllenCCFv3Space` instance can be programmatically identified using `isinstance(space, AllenCCFv3Space)`.
 
+#### Macaque Atlas Spaces
+
+Three canonical macaque atlas spaces are also available as predefined classes. All use RAS orientation and millimeter units.
+
+**D99v2Space** (Reveley et al. 2017; Saleem et al. 2021): Origin at the anterior commissure, horizontal plane aligned to the AC-PC line.
+
+```python
+from ndx_anatomical_localization import D99v2Space
+
+space = D99v2Space()
+```
+
+**NMTv2symSpace** (Jung et al. 2021): Origin at ear bar zero (intersection of the midsagittal plane and interaural line), horizontal plane aligned to the Horsley-Clarke stereotaxic convention.
+
+```python
+from ndx_anatomical_localization import NMTv2symSpace
+
+space = NMTv2symSpace()
+```
+
+**MEBRAINSSpace** (Balan et al. 2024): Origin at the anterior commissure, horizontal plane approximately aligned to the Horsley-Clarke convention.
+
+```python
+from ndx_anatomical_localization import MEBRAINSSpace
+
+space = MEBRAINSSpace()
+```
+
+Each class can be programmatically identified using `isinstance()`, e.g. `isinstance(space, D99v2Space)`.
+
 ### AnatomicalCoordinatesTable
 Once you have a `Space` object, you can create an `AnatomicalCoordinatesTable`.
 The "localized_entity" attribute is a reference to the object that is localized (e.g. an electrode table).
