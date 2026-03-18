@@ -17,6 +17,7 @@ from ndx_anatomical_localization import (
     AllenCCFv3Space,
     D99v2Space,
     NMTv2Space,
+    NMTv2AsymmetricSpace,
     MEBRAINSSpace,
     Localization,
     Landmarks,
@@ -322,6 +323,69 @@ def test_nmtv2sym_space_write_read(tmp_path):
 
     assert isinstance(read_table.space, NMTv2Space)
     assert read_table.space.space_name == "NMTv2"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert read_table.space.extent is None
+
+
+# ---------------------------------------------------------------------------
+# NMTv2AsymmetricSpace
+# ---------------------------------------------------------------------------
+
+
+def test_create_nmtv2_asymmetric_space():
+    """Test creating NMTv2AsymmetricSpace directly."""
+    space = NMTv2AsymmetricSpace()
+
+    assert space.name == "NMTv2Asymmetric"
+    assert space.space_name == "NMTv2Asymmetric"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert space.extent is None
+
+
+def test_create_nmtv2_asymmetric_space_custom_name():
+    """Test creating NMTv2AsymmetricSpace with custom name."""
+    space = NMTv2AsymmetricSpace(name="my_nmt_asym_space")
+
+    assert space.name == "my_nmt_asym_space"
+    assert space.space_name == "NMTv2Asymmetric"
+    assert space.orientation == "RAS"
+
+
+def test_nmtv2_asymmetric_space_write_read(tmp_path):
+    """Test that NMTv2AsymmetricSpace type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = NMTv2AsymmetricSpace()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="NMTAsymLocalization",
+        target=electrodes_table,
+        description="NMT asymmetric coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_nmt_asym.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_nmt_asym.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["NMTAsymLocalization"]
+
+    assert isinstance(read_table.space, NMTv2AsymmetricSpace)
+    assert read_table.space.space_name == "NMTv2Asymmetric"
     assert read_table.space.orientation == "RAS"
     assert read_table.space.units == "mm"
     assert read_table.space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."

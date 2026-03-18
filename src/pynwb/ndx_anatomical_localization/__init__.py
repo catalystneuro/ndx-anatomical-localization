@@ -23,6 +23,7 @@ from .ndx_anatomical_localization import (
     AllenCCFv3Space,
     D99v2Space,
     NMTv2Space,
+    NMTv2AsymmetricSpace,
     MEBRAINSSpace,
     AnatomicalCoordinatesTable,
     Localization,

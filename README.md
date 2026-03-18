@@ -89,6 +89,14 @@ from ndx_anatomical_localization import NMTv2Space
 space = NMTv2Space()
 ```
 
+**NMTv2AsymmetricSpace** (Jung et al. 2021): Same origin and alignment as `NMTv2Space`, but preserves population-level hemispheric differences instead of enforcing symmetry. Note that the CHARM and SARM parcellations are only defined on the symmetric variant.
+
+```python
+from ndx_anatomical_localization import NMTv2AsymmetricSpace
+
+space = NMTv2AsymmetricSpace()
+```
+
 **MEBRAINSSpace** (Balan et al. 2024): Origin at the anterior commissure, horizontal plane approximately aligned to the Horsley-Clarke convention.
 
 ```python

@@ -156,6 +156,33 @@ class NMTv2Space(TempNMTv2Space):
         )
 
 
+TempNMTv2AsymmetricSpace = get_class("NMTv2AsymmetricSpace", "ndx-anatomical-localization")
+
+
+@register_class("NMTv2AsymmetricSpace", "ndx-anatomical-localization")
+class NMTv2AsymmetricSpace(TempNMTv2AsymmetricSpace):
+    """
+    The NIMH Macaque Template version 2.0 asymmetric (Jung et al. 2021).
+
+    This canonical space uses RAS orientation (positive x=Right, positive y=Anterior,
+    positive z=Superior) with millimeter units. The origin (0,0,0) is at ear bar zero.
+    Unlike the symmetric variant, this template preserves population-level hemispheric differences.
+    """
+
+    @docval(
+        {"name": "name", "type": str, "doc": "name of the NWB object", "default": "NMTv2Asymmetric"},
+        allow_positional=AllowPositional.ERROR,
+    )
+    def __init__(self, name="NMTv2Asymmetric"):
+        super().__init__(
+            name=name,
+            space_name="NMTv2Asymmetric",
+            origin="Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention.",
+            units="mm",
+            orientation="RAS",
+        )
+
+
 TempMEBRAINSSpace = get_class("MEBRAINSSpace", "ndx-anatomical-localization")
 
 

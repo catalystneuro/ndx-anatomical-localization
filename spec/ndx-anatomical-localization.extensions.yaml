@@ -134,6 +134,30 @@ groups:
         dtype: text
         value: RAS
         doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
+  - neurodata_type_def: NMTv2AsymmetricSpace
+    neurodata_type_inc: Space
+    doc:
+      "The NIMH Macaque Template version 2.0 asymmetric (Jung et al. 2021).
+      This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
+      with millimeter units. The origin (0,0,0) is at ear bar zero. Unlike the symmetric variant,
+      this template preserves population-level hemispheric differences."
+    attributes:
+      - name: space_name
+        dtype: text
+        value: NMTv2Asymmetric
+        doc: "Name of the space (fixed to NMTv2Asymmetric)"
+      - name: origin
+        dtype: text
+        value: "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+        doc: "Origin of the coordinate system (fixed)"
+      - name: units
+        dtype: text
+        value: mm
+        doc: "Units of measurement (fixed to millimeters)"
+      - name: orientation
+        dtype: text
+        value: RAS
+        doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
   - neurodata_type_def: MEBRAINSSpace
     neurodata_type_inc: Space
     doc:
