@@ -124,7 +124,10 @@ class D99v2Space(TempD99v2Space):
         super().__init__(
             name=name,
             space_name="D99v2",
-            origin="Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure).",
+            origin=(
+                "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line"
+                " (anterior commissure to posterior commissure)."
+            ),
             units="mm",
             orientation="RAS",
         )
@@ -150,7 +153,10 @@ class NMTv2Space(TempNMTv2Space):
         super().__init__(
             name=name,
             space_name="NMTv2",
-            origin="Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention.",
+            origin=(
+                "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line."
+                " Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+            ),
             units="mm",
             orientation="RAS",
         )
@@ -177,7 +183,10 @@ class NMTv2AsymmetricSpace(TempNMTv2AsymmetricSpace):
         super().__init__(
             name=name,
             space_name="NMTv2Asymmetric",
-            origin="Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention.",
+            origin=(
+                "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line."
+                " Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+            ),
             units="mm",
             orientation="RAS",
         )

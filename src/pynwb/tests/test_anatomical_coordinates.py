@@ -203,6 +203,20 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
         npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
 
 
+D99V2_ORIGIN = (
+    "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line"
+    " (anterior commissure to posterior commissure)."
+)
+NMT_ORIGIN = (
+    "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line."
+    " Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+)
+MEBRAINS_ORIGIN = (
+    "Anterior commissure (AC). Horizontal plane approximately aligned"
+    " to the Horsley-Clarke convention."
+)
+
+
 # ---------------------------------------------------------------------------
 # D99v2Space
 # ---------------------------------------------------------------------------
@@ -216,7 +230,7 @@ def test_create_d99v2_space():
     assert space.space_name == "D99v2"
     assert space.orientation == "RAS"
     assert space.units == "mm"
-    assert space.origin == "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure)."
+    assert space.origin == D99V2_ORIGIN
     assert space.extent is None
 
 
@@ -262,7 +276,7 @@ def test_d99v2_space_write_read(tmp_path):
     assert read_table.space.space_name == "D99v2"
     assert read_table.space.orientation == "RAS"
     assert read_table.space.units == "mm"
-    assert read_table.space.origin == "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure)."
+    assert read_table.space.origin == D99V2_ORIGIN
     assert read_table.space.extent is None
 
 
@@ -279,7 +293,7 @@ def test_create_nmtv2sym_space():
     assert space.space_name == "NMTv2"
     assert space.orientation == "RAS"
     assert space.units == "mm"
-    assert space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert space.origin == NMT_ORIGIN
     assert space.extent is None
 
 
@@ -325,7 +339,7 @@ def test_nmtv2sym_space_write_read(tmp_path):
     assert read_table.space.space_name == "NMTv2"
     assert read_table.space.orientation == "RAS"
     assert read_table.space.units == "mm"
-    assert read_table.space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert read_table.space.origin == NMT_ORIGIN
     assert read_table.space.extent is None
 
 
@@ -342,7 +356,7 @@ def test_create_nmtv2_asymmetric_space():
     assert space.space_name == "NMTv2Asymmetric"
     assert space.orientation == "RAS"
     assert space.units == "mm"
-    assert space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert space.origin == NMT_ORIGIN
     assert space.extent is None
 
 
@@ -388,7 +402,7 @@ def test_nmtv2_asymmetric_space_write_read(tmp_path):
     assert read_table.space.space_name == "NMTv2Asymmetric"
     assert read_table.space.orientation == "RAS"
     assert read_table.space.units == "mm"
-    assert read_table.space.origin == "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+    assert read_table.space.origin == NMT_ORIGIN
     assert read_table.space.extent is None
 
 
@@ -405,7 +419,7 @@ def test_create_mebrains_space():
     assert space.space_name == "MEBRAINS"
     assert space.orientation == "RAS"
     assert space.units == "mm"
-    assert space.origin == "Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention."
+    assert space.origin == MEBRAINS_ORIGIN
     assert space.extent is None
 
 
@@ -451,7 +465,7 @@ def test_mebrains_space_write_read(tmp_path):
     assert read_table.space.space_name == "MEBRAINS"
     assert read_table.space.orientation == "RAS"
     assert read_table.space.units == "mm"
-    assert read_table.space.origin == "Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention."
+    assert read_table.space.origin == MEBRAINS_ORIGIN
     assert read_table.space.extent is None
 
 
