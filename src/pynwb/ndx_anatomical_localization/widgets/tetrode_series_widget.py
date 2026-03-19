@@ -10,8 +10,8 @@
 #   nwb2widget(nwbfile)
 
 try:
-    from nwbwidgets.ecephys import ElectricalSeriesWidget
     from ipywidgets import widgets
+    from nwbwidgets.ecephys import ElectricalSeriesWidget
 
     from .. import TetrodeSeries
 
