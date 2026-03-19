@@ -79,6 +79,7 @@ exclude = []
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,hdmf-common-schema,./docs/_build/*,*.ipynb"
+ignore-words-list = "mebrains"
 
 [tool.coverage.run]
 branch = true

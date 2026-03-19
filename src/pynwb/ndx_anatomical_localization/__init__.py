@@ -26,8 +26,12 @@ from .ndx_anatomical_localization import (
     AnatomicalCoordinatesTable,
     AtlasRegistration,
     BrainRegionMasks,
+    D99v2Space,
     Landmarks,
     Localization,
+    MEBRAINSSpace,
+    NMTv2AsymmetricSpace,
+    NMTv2Space,
     Space,
 )
 

@@ -88,6 +88,99 @@ groups:
           - 3
         value: [13200.0, 8000.0, 11400.0]
         doc: "Atlas extent in micrometers: [AP=13200, DV=8000, ML=11400]"
+  - neurodata_type_def: D99v2Space
+    neurodata_type_inc: Space
+    doc:
+      "The D99 macaque brain atlas version 2.0 (Reveley et al. 2017; Saleem et al. 2021).
+      This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
+      with millimeter units. The origin (0,0,0) is at the anterior commissure."
+    attributes:
+      - name: space_name
+        dtype: text
+        value: D99v2
+        doc: "Name of the space (fixed to D99v2)"
+      - name: origin
+        dtype: text
+        value: "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line (anterior commissure to posterior commissure)."
+        doc: "Origin of the coordinate system (fixed)"
+      - name: units
+        dtype: text
+        value: mm
+        doc: "Units of measurement (fixed to millimeters)"
+      - name: orientation
+        dtype: text
+        value: RAS
+        doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
+  - neurodata_type_def: NMTv2Space
+    neurodata_type_inc: Space
+    doc:
+      "The NIMH Macaque Template version 2.0 symmetric (Jung et al. 2021).
+      This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
+      with millimeter units. The origin (0,0,0) is at ear bar zero."
+    attributes:
+      - name: space_name
+        dtype: text
+        value: NMTv2
+        doc: "Name of the space (fixed to NMTv2)"
+      - name: origin
+        dtype: text
+        value: "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+        doc: "Origin of the coordinate system (fixed)"
+      - name: units
+        dtype: text
+        value: mm
+        doc: "Units of measurement (fixed to millimeters)"
+      - name: orientation
+        dtype: text
+        value: RAS
+        doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
+  - neurodata_type_def: NMTv2AsymmetricSpace
+    neurodata_type_inc: Space
+    doc:
+      "The NIMH Macaque Template version 2.0 asymmetric (Jung et al. 2021).
+      This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
+      with millimeter units. The origin (0,0,0) is at ear bar zero. Unlike the symmetric variant,
+      this template preserves population-level hemispheric differences."
+    attributes:
+      - name: space_name
+        dtype: text
+        value: NMTv2Asymmetric
+        doc: "Name of the space (fixed to NMTv2Asymmetric)"
+      - name: origin
+        dtype: text
+        value: "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line. Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+        doc: "Origin of the coordinate system (fixed)"
+      - name: units
+        dtype: text
+        value: mm
+        doc: "Units of measurement (fixed to millimeters)"
+      - name: orientation
+        dtype: text
+        value: RAS
+        doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
+  - neurodata_type_def: MEBRAINSSpace
+    neurodata_type_inc: Space
+    doc:
+      "The MEBRAINS macaque brain atlas version 1.0 (Balan et al. 2024).
+      This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
+      with millimeter units. The origin (0,0,0) is at the anterior commissure."
+    attributes:
+      - name: space_name
+        dtype: text
+        value: MEBRAINS
+        doc: "Name of the space (fixed to MEBRAINS)"
+      - name: origin
+        dtype: text
+        value: "Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention."
+        doc: "Origin of the coordinate system (fixed)"
+      - name: units
+        dtype: text
+        value: mm
+        doc: "Units of measurement (fixed to millimeters)"
+      - name: orientation
+        dtype: text
+        value: RAS
+        doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
   - neurodata_type_def: AnatomicalCoordinatesTable
     neurodata_type_inc: DynamicTable
     doc: "A table for storing anatomical coordinates for rows of another table determined using a single method"

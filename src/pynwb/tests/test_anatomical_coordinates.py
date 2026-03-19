@@ -16,11 +16,15 @@ from ndx_anatomical_localization import (
     AnatomicalCoordinatesTable,
     AtlasRegistration,
     BrainRegionMasks,
+    D99v2Space,
     Landmarks,
     Localization,
+    MEBRAINSSpace,
+    NMTv2AsymmetricSpace,
+    NMTv2Space,
     Space,
 )
-from pynwb import NWBHDF5IO
+from pynwb import NWBHDF5IO, read_nwb
 
 
 def test_create_custom_space():
@@ -196,6 +200,269 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
             np.ones((5, 5)) * 3.0,
         )
         npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
+
+
+D99V2_ORIGIN = (
+    "Anterior commissure (AC). Horizontal plane aligned to the AC-PC line"
+    " (anterior commissure to posterior commissure)."
+)
+NMT_ORIGIN = (
+    "Ear bar zero (EBZ): intersection of the midsagittal plane and the interaural line."
+    " Horizontal plane aligned to the Horsley-Clarke stereotaxic convention."
+)
+MEBRAINS_ORIGIN = "Anterior commissure (AC). Horizontal plane approximately aligned to the Horsley-Clarke convention."
+
+
+# ---------------------------------------------------------------------------
+# D99v2Space
+# ---------------------------------------------------------------------------
+
+
+def test_create_d99v2_space():
+    """Test creating D99v2Space directly."""
+    space = D99v2Space()
+
+    assert space.name == "D99v2"
+    assert space.space_name == "D99v2"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == D99V2_ORIGIN
+    assert space.extent is None
+
+
+def test_create_d99v2_space_custom_name():
+    """Test creating D99v2Space with custom name."""
+    space = D99v2Space(name="my_d99_space")
+
+    assert space.name == "my_d99_space"
+    assert space.space_name == "D99v2"
+    assert space.orientation == "RAS"
+
+
+def test_d99v2_space_write_read(tmp_path):
+    """Test that D99v2Space type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = D99v2Space()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="D99Localization",
+        target=electrodes_table,
+        description="D99 coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_d99.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_d99.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["D99Localization"]
+
+    assert isinstance(read_table.space, D99v2Space)
+    assert read_table.space.space_name == "D99v2"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == D99V2_ORIGIN
+    assert read_table.space.extent is None
+
+
+# ---------------------------------------------------------------------------
+# NMTv2Space
+# ---------------------------------------------------------------------------
+
+
+def test_create_nmtv2sym_space():
+    """Test creating NMTv2Space directly."""
+    space = NMTv2Space()
+
+    assert space.name == "NMTv2"
+    assert space.space_name == "NMTv2"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == NMT_ORIGIN
+    assert space.extent is None
+
+
+def test_create_nmtv2sym_space_custom_name():
+    """Test creating NMTv2Space with custom name."""
+    space = NMTv2Space(name="my_nmt_space")
+
+    assert space.name == "my_nmt_space"
+    assert space.space_name == "NMTv2"
+    assert space.orientation == "RAS"
+
+
+def test_nmtv2sym_space_write_read(tmp_path):
+    """Test that NMTv2Space type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = NMTv2Space()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="NMTLocalization",
+        target=electrodes_table,
+        description="NMT coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_nmt.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_nmt.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["NMTLocalization"]
+
+    assert isinstance(read_table.space, NMTv2Space)
+    assert read_table.space.space_name == "NMTv2"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == NMT_ORIGIN
+    assert read_table.space.extent is None
+
+
+# ---------------------------------------------------------------------------
+# NMTv2AsymmetricSpace
+# ---------------------------------------------------------------------------
+
+
+def test_create_nmtv2_asymmetric_space():
+    """Test creating NMTv2AsymmetricSpace directly."""
+    space = NMTv2AsymmetricSpace()
+
+    assert space.name == "NMTv2Asymmetric"
+    assert space.space_name == "NMTv2Asymmetric"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == NMT_ORIGIN
+    assert space.extent is None
+
+
+def test_create_nmtv2_asymmetric_space_custom_name():
+    """Test creating NMTv2AsymmetricSpace with custom name."""
+    space = NMTv2AsymmetricSpace(name="my_nmt_asym_space")
+
+    assert space.name == "my_nmt_asym_space"
+    assert space.space_name == "NMTv2Asymmetric"
+    assert space.orientation == "RAS"
+
+
+def test_nmtv2_asymmetric_space_write_read(tmp_path):
+    """Test that NMTv2AsymmetricSpace type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = NMTv2AsymmetricSpace()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="NMTAsymLocalization",
+        target=electrodes_table,
+        description="NMT asymmetric coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_nmt_asym.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_nmt_asym.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["NMTAsymLocalization"]
+
+    assert isinstance(read_table.space, NMTv2AsymmetricSpace)
+    assert read_table.space.space_name == "NMTv2Asymmetric"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == NMT_ORIGIN
+    assert read_table.space.extent is None
+
+
+# ---------------------------------------------------------------------------
+# MEBRAINSSpace
+# ---------------------------------------------------------------------------
+
+
+def test_create_mebrains_space():
+    """Test creating MEBRAINSSpace directly."""
+    space = MEBRAINSSpace()
+
+    assert space.name == "MEBRAINS"
+    assert space.space_name == "MEBRAINS"
+    assert space.orientation == "RAS"
+    assert space.units == "mm"
+    assert space.origin == MEBRAINS_ORIGIN
+    assert space.extent is None
+
+
+def test_create_mebrains_space_custom_name():
+    """Test creating MEBRAINSSpace with custom name."""
+    space = MEBRAINSSpace(name="my_mebrains_space")
+
+    assert space.name == "my_mebrains_space"
+    assert space.space_name == "MEBRAINS"
+    assert space.orientation == "RAS"
+
+
+def test_mebrains_space_write_read(tmp_path):
+    """Test that MEBRAINSSpace type is preserved through write/read cycle."""
+    nwbfile = mock_NWBFile()
+    localization = Localization()
+    nwbfile.add_lab_meta_data([localization])
+
+    electrodes_table = mock_ElectrodeTable(nwbfile=nwbfile)
+
+    space = MEBRAINSSpace()
+    localization.add_spaces([space])
+
+    table = AnatomicalCoordinatesTable(
+        name="MEBRAINSLocalization",
+        target=electrodes_table,
+        description="MEBRAINS coordinates",
+        method="manual annotation",
+        space=space,
+    )
+    table.add_row(x=1.0, y=2.0, z=3.0, brain_region="V1", localized_entity=0)
+
+    localization.add_anatomical_coordinates_tables([table])
+
+    with NWBHDF5IO(tmp_path / "test_mebrains.nwb", "w") as io:
+        io.write(nwbfile)
+
+    read_nwbfile = read_nwb(tmp_path / "test_mebrains.nwb")
+    read_localization = read_nwbfile.lab_meta_data["localization"]
+    read_table = read_localization.anatomical_coordinates_tables["MEBRAINSLocalization"]
+
+    assert isinstance(read_table.space, MEBRAINSSpace)
+    assert read_table.space.space_name == "MEBRAINS"
+    assert read_table.space.orientation == "RAS"
+    assert read_table.space.units == "mm"
+    assert read_table.space.origin == MEBRAINS_ORIGIN
+    assert read_table.space.extent is None
 
 
 def test_create_anatomical_coordinates_image_w_two_photon_series():
