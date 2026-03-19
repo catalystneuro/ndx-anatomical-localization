@@ -1,18 +1,16 @@
 import numpy as np
-
 from hdmf.common import DynamicTable
+from hdmf.utils import AllowPositional, get_docval
 from pynwb.image import Image
 from pynwb.ophys import OnePhotonSeries, TwoPhotonSeries
-from hdmf.utils import get_docval, AllowPositional
 
-from pynwb import get_class, register_class, docval
+from pynwb import docval, get_class, register_class
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
 
 
 @register_class("Space", "ndx-anatomical-localization")
 class Space(TempSpace):
-
     @docval(
         {"name": "name", "type": str, "doc": "name of the NWB object"},
         {"name": "space_name", "type": str, "doc": "name of the space"},
@@ -103,6 +101,7 @@ class AllenCCFv3Space(TempAllenCCFv3Space):
             orientation="PIR",
             extent=np.array([13200.0, 8000.0, 11400.0]),
         )
+
 
 TempD99v2Space = get_class("D99v2Space", "ndx-anatomical-localization")
 
@@ -223,7 +222,6 @@ TempBrainRegionMasks = get_class("BrainRegionMasks", "ndx-anatomical-localizatio
 
 @register_class("BrainRegionMasks", "ndx-anatomical-localization")
 class BrainRegionMasks(TempBrainRegionMasks):
-
     def _to_image(self, image_height: int, image_width: int) -> np.ndarray:
         """Reconstruct a 2D brain region ID array from the flat (x, y, brain_region_id) table.
 
@@ -272,9 +270,7 @@ class AffineTransformation(TempAffineTransformation):
     def __init__(self, **kwargs):
         affine_matrix = np.asarray(kwargs["affine_matrix"], dtype=np.float64)
         if affine_matrix.shape != (3, 3):
-            raise ValueError(
-                f"Affine matrix must be a 3x3 array. Provided shape: {affine_matrix.shape}"
-            )
+            raise ValueError(f"Affine matrix must be a 3x3 array. Provided shape: {affine_matrix.shape}")
         kwargs["affine_matrix"] = affine_matrix
         super().__init__(**kwargs)
 
@@ -285,7 +281,6 @@ TempAtlasRegistration = get_class("AtlasRegistration", "ndx-anatomical-localizat
 
 @register_class("AtlasRegistration", "ndx-anatomical-localization")
 class AtlasRegistration(TempAtlasRegistration):
-
     @docval(
         {
             "name": "source_image",
@@ -338,7 +333,6 @@ Localization = get_class("Localization", "ndx-anatomical-localization")
 
 @register_class("AnatomicalCoordinatesTable", "ndx-anatomical-localization")
 class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
-
     @docval(
         {"name": "space", "type": Space, "doc": "space of the table"},
         {"name": "method", "type": str, "doc": "method of the table"},
@@ -369,7 +363,6 @@ class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
 
 @register_class("AnatomicalCoordinatesImage", "ndx-anatomical-localization")
 class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
-
     @docval(
         {"name": "name", "type": str, "doc": "name of the NWB object"},
         {"name": "description", "type": str, "doc": "description of the NWB object", "default": None},
