@@ -3,7 +3,6 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pynwb import NWBHDF5IO
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
 from pynwb.testing.mock.ecephys import mock_ElectrodeTable
@@ -21,6 +20,7 @@ from ndx_anatomical_localization import (
     Localization,
     Space,
 )
+from pynwb import NWBHDF5IO
 
 
 def test_create_custom_space():

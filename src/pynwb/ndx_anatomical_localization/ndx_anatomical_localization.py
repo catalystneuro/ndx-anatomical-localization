@@ -1,9 +1,10 @@
 import numpy as np
 from hdmf.common import DynamicTable
 from hdmf.utils import AllowPositional, get_docval
-from pynwb import docval, get_class, register_class
 from pynwb.image import Image
 from pynwb.ophys import OnePhotonSeries, TwoPhotonSeries
+
+from pynwb import docval, get_class, register_class
 
 TempSpace = get_class("Space", "ndx-anatomical-localization")
 
