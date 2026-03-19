@@ -1,26 +1,26 @@
 """Unit and integration tests for the new neurodata type."""
 
-import pytest
-from pynwb import NWBHDF5IO
-from pynwb.base import Images
-from pynwb.image import GrayscaleImage
-from pynwb.testing.mock.file import mock_NWBFile
-from pynwb.testing.mock.ecephys import mock_ElectrodeTable
-from pynwb.testing.mock.ophys import mock_TwoPhotonSeries, mock_OnePhotonSeries
 import numpy as np
 import numpy.testing as npt
+import pytest
+from pynwb.base import Images
+from pynwb.image import GrayscaleImage
+from pynwb.testing.mock.ecephys import mock_ElectrodeTable
+from pynwb.testing.mock.file import mock_NWBFile
+from pynwb.testing.mock.ophys import mock_OnePhotonSeries, mock_TwoPhotonSeries
 
 from ndx_anatomical_localization import (
+    AffineTransformation,
+    AllenCCFv3Space,
     AnatomicalCoordinatesImage,
     AnatomicalCoordinatesTable,
-    Space,
-    AllenCCFv3Space,
-    Localization,
-    Landmarks,
-    AffineTransformation,
-    BrainRegionMasks,
     AtlasRegistration,
+    BrainRegionMasks,
+    Landmarks,
+    Localization,
+    Space,
 )
+from pynwb import NWBHDF5IO
 
 
 def test_create_custom_space():
@@ -34,7 +34,6 @@ def test_create_custom_space():
 
 
 def test_create_anatomical_coordinates_table():
-
     nwbfile = mock_NWBFile()
 
     localization = Localization()
@@ -200,7 +199,6 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
 
 
 def test_create_anatomical_coordinates_image_w_two_photon_series():
-
     nwbfile = mock_NWBFile()
 
     localization = Localization()
@@ -268,7 +266,6 @@ def test_create_anatomical_coordinates_image_w_two_photon_series():
 
 
 def test_create_anatomical_coordinates_image_w_one_photon_series():
-
     nwbfile = mock_NWBFile()
 
     localization = Localization()
@@ -319,7 +316,6 @@ def test_create_anatomical_coordinates_image_w_one_photon_series():
 
 
 def test_create_anatomical_coordinates_image_w_image():
-
     nwbfile = mock_NWBFile()
 
     localization = Localization()
@@ -461,7 +457,6 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
 
 
 def test_get_coordinates():
-
     nwbfile = mock_NWBFile()
 
     localization = Localization()
@@ -542,12 +537,20 @@ def test_landmarks_write_read(tmp_path):
 
     landmarks = Landmarks(name="landmarks", description="landmark correspondences")
     landmarks.add_row(
-        source_x=100.0, source_y=200.0, reference_x=5000.0, reference_y=3000.0,
-        landmark_labels="bregma", confidence=0.95
+        source_x=100.0,
+        source_y=200.0,
+        reference_x=5000.0,
+        reference_y=3000.0,
+        landmark_labels="bregma",
+        confidence=0.95,
     )
     landmarks.add_row(
-        source_x=150.0, source_y=250.0, reference_x=6000.0, reference_y=4000.0,
-        landmark_labels="lambda", confidence=0.90
+        source_x=150.0,
+        source_y=250.0,
+        reference_x=6000.0,
+        reference_y=4000.0,
+        landmark_labels="lambda",
+        confidence=0.90,
     )
 
     registration = AtlasRegistration(

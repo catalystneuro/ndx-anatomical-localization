@@ -1,5 +1,6 @@
 import os
-from pynwb import load_namespaces, get_class, register_class
+
+from pynwb import get_class, load_namespaces, register_class
 
 try:
     from importlib.resources import files
@@ -19,15 +20,15 @@ if not os.path.exists(__spec_path):
 load_namespaces(str(__spec_path))
 
 from .ndx_anatomical_localization import (
-    Space,
-    AllenCCFv3Space,
-    AnatomicalCoordinatesTable,
-    Localization,
-    AnatomicalCoordinatesImage,
-    Landmarks,
     AffineTransformation,
-    BrainRegionMasks,
+    AllenCCFv3Space,
+    AnatomicalCoordinatesImage,
+    AnatomicalCoordinatesTable,
     AtlasRegistration,
+    BrainRegionMasks,
+    Landmarks,
+    Localization,
+    Space,
 )
 
 # NOTE: `widgets/tetrode_series_widget.py` adds a "widget"
