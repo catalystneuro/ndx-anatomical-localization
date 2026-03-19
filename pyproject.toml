@@ -126,12 +126,12 @@ known-first-party = ["ndx_anatomical_localization"]
 
 [dependency-groups]
 test = [
-    "codespell",
-    "coverage",
-    "pytest",
-    "pytest-cov",
-    "pytest-subtests",
-    "ruff",
+    "codespell>=2.3",
+    "coverage>=7.0",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-subtests>=0.12",
+    "ruff>=0.15",
 ]
 
 dev = [
