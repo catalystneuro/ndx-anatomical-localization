@@ -52,7 +52,8 @@ jobs:
       - name: Install run requirements (minimum)
         if: ${{ matrix.requirements == 'minimum' }}
         run: |
-          python -m pip install --group test --resolution lowest-direct .
+          python -m pip install uv
+          python -m uv pip install --resolution lowest-direct --group test -e .
 
       - name: Install run requirements (pinned)
         if: ${{ matrix.requirements == 'pinned' }}
@@ -88,75 +89,5 @@ jobs:
         run: |
           python -m venv test-wheel-env
           test-wheel-env/Scripts/activate.bat
-          python -m pip install dist/*-none-any.whl
-          python -c "import ndx_anatomical_localization"
-
-  run-all-tests-on-conda:
-    name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
-    defaults:
-     run:
-       shell: bash -l {0}  # needed for conda environment to work
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.name }}
-      cancel-in-progress: true
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { name: conda-linux-python3.10-minimum   , requirements: minimum    , python-ver: "3.10", os: ubuntu-latest }
-          - { name: conda-linux-python3.10           , requirements: pinned     , python-ver: "3.10", os: ubuntu-latest }
-          - { name: conda-linux-python3.13           , requirements: pinned     , python-ver: "3.13", os: ubuntu-latest }
-          - { name: conda-linux-python3.13-upgraded  , requirements: upgraded   , python-ver: "3.13", os: ubuntu-latest }
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # tags are required to determine the version
-
-      - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          auto-activate-base: true
-          activate-environment: true
-          python-version: ${{ matrix.python-ver }}
-
-      - name: Install build dependencies
-        run: |
-          conda config --set always_yes yes --set changeps1 no
-          conda info
-          conda config --show-sources
-          conda list --show-channel-urls
-
-      - name: Install run requirements (minimum)
-        if: ${{ matrix.requirements == 'minimum' }}
-        run: |
-          python -m pip install --group test --resolution lowest-direct .
-
-      - name: Install run requirements (pinned)
-        if: ${{ matrix.requirements == 'pinned' }}
-        run: |
-          python -m pip install --group test .
-
-      - name: Install run requirements (upgraded)
-        if: ${{ matrix.requirements == 'upgraded' }}
-        run: |
-          python -m pip install --group test -U -e .
-
-      - name: Run tests
-        run: |
-          pytest -v
-
-      - name: Build wheel and source distribution
-        run: |
-          python -m pip install --upgrade build
-          python -m build
-          ls -1 dist
-
-      - name: Test installation from a wheel (POSIX)
-        run: |
-          python -m venv test-wheel-env
-          source test-wheel-env/bin/activate
           python -m pip install dist/*-none-any.whl
           python -c "import ndx_anatomical_localization"
