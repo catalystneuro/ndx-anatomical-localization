@@ -226,7 +226,7 @@ groups:
         doc: "The space in which the coordinates are defined"
         name: space
       - target_type: Image
-        quantity: 1
+        quantity: "?"
         doc: "The reference image (e.g. mean or max projection) on which the coordinate map is based"
         name: image
       - target_type: ImageSeries
@@ -284,7 +284,6 @@ groups:
             - null
         doc: 2D array of brain region names for each pixel
         quantity: "?"
-
 
   - neurodata_type_def: Landmarks
     neurodata_type_inc: DynamicTable
