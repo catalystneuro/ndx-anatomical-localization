@@ -2,7 +2,7 @@ import numpy as np
 from hdmf.common import DynamicTable
 from hdmf.utils import AllowPositional, get_docval
 from pynwb.image import Image
-from pynwb.ophys import OnePhotonSeries, TwoPhotonSeries
+from pynwb.ophys import ImagingPlane
 
 from pynwb import docval, get_class, register_class
 
@@ -363,6 +363,7 @@ class AnatomicalCoordinatesTable(TempAnatomicalCoordinatesTable):
 
 @register_class("AnatomicalCoordinatesImage", "ndx-anatomical-localization")
 class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
+
     @docval(
         {"name": "name", "type": str, "doc": "name of the NWB object"},
         {"name": "description", "type": str, "doc": "description of the NWB object", "default": None},
@@ -375,8 +376,10 @@ class AnatomicalCoordinatesImage(TempAnatomicalCoordinatesImage):
         },
         {
             "name": "localized_entity",
-            "type": (OnePhotonSeries, TwoPhotonSeries),
-            "doc": "The imaging series (OnePhotonSeries or TwoPhotonSeries) that this coordinate map applies to",
+            "type": ImagingPlane,
+            "doc": (
+                "The imaging plane associated with the OnePhotonSeries or TwoPhotonSeries that this coordinate map applies to"
+            ),
             "default": None,
             "allow_none": True,
         },

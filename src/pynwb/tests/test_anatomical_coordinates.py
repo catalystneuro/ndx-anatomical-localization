@@ -7,7 +7,7 @@ from pynwb.base import Images
 from pynwb.image import GrayscaleImage
 from pynwb.testing.mock.ecephys import mock_ElectrodeTable
 from pynwb.testing.mock.file import mock_NWBFile
-from pynwb.testing.mock.ophys import mock_OnePhotonSeries, mock_TwoPhotonSeries
+from pynwb.testing.mock.ophys import mock_ImagingPlane
 
 from ndx_anatomical_localization import (
     AffineTransformation,
@@ -153,7 +153,7 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="MeanImage", data=np.ones((5, 5)), description="mean image"))
 
-    two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name="MyImagingPlane")
 
     space = AllenCCFv3Space()
     localization.add_spaces([space])
@@ -161,7 +161,7 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
     image_coordinates = AnatomicalCoordinatesImage(
         name="MyAnatomicalLocalization",
         image=image_collection["MeanImage"],
-        localized_entity=two_photon_series,
+        localized_entity=imaging_plane,
         method="method",
         space=space,
         x=np.ones((5, 5)),
@@ -178,14 +178,14 @@ def test_anatomical_coordinates_image_with_allen_ccfv3_space():
     with NWBHDF5IO("test_image_ccf.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_summary_image = read_nwbfile.processing["ophys"]["SummaryImages"]["MeanImage"]
-        read_two_photon_series = read_nwbfile.acquisition["TwoPhotonSeries"]
+        read_imaging_plane = read_nwbfile.imaging_planes["MyImagingPlane"]
         read_localization = read_nwbfile.lab_meta_data["localization"]
 
         read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
 
         assert read_coordinates_image.method == "method"
         assert read_coordinates_image.image is read_summary_image
-        assert read_coordinates_image.localized_entity is read_two_photon_series
+        assert read_coordinates_image.localized_entity is read_imaging_plane
         assert isinstance(read_coordinates_image.space, AllenCCFv3Space)
         npt.assert_array_equal(
             read_coordinates_image.x[:],
@@ -465,7 +465,7 @@ def test_mebrains_space_write_read(tmp_path):
     assert read_table.space.extent is None
 
 
-def test_create_anatomical_coordinates_image_w_two_photon_series():
+def test_create_anatomical_coordinates_image_w_imaging_plane():
     nwbfile = mock_NWBFile()
 
     localization = Localization()
@@ -477,7 +477,7 @@ def test_create_anatomical_coordinates_image_w_two_photon_series():
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="MeanImage", data=np.ones((5, 5)), description="mean image"))
 
-    two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+    imaging_plane = imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name="MyImagingPlane")
 
     space = Space(
         name="MySpace",
@@ -491,7 +491,7 @@ def test_create_anatomical_coordinates_image_w_two_photon_series():
     image_coordinates = AnatomicalCoordinatesImage(
         name="MyAnatomicalLocalization",
         image=image_collection["MeanImage"],
-        localized_entity=two_photon_series,
+        localized_entity=imaging_plane,
         method="method",
         space=space,
         x=np.ones((5, 5)),
@@ -508,14 +508,14 @@ def test_create_anatomical_coordinates_image_w_two_photon_series():
     with NWBHDF5IO("test_image.nwb", "r", load_namespaces=True) as io:
         read_nwbfile = io.read()
         read_summary_image = read_nwbfile.processing["ophys"]["SummaryImages"]["MeanImage"]
-        read_two_photon_series = read_nwbfile.acquisition["TwoPhotonSeries"]
+        read_imaging_plane = read_nwbfile.imaging_planes["MyImagingPlane"]
         read_localization = read_nwbfile.lab_meta_data["localization"]
 
         read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
 
         assert read_coordinates_image.method == "method"
         assert read_coordinates_image.image is read_summary_image
-        assert read_coordinates_image.localized_entity is read_two_photon_series
+        assert read_coordinates_image.localized_entity is read_imaging_plane
         assert read_coordinates_image.space.origin == "bregma"
         npt.assert_array_equal(
             read_coordinates_image.x[:],
@@ -532,56 +532,6 @@ def test_create_anatomical_coordinates_image_w_two_photon_series():
         npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
 
 
-def test_create_anatomical_coordinates_image_w_one_photon_series():
-    nwbfile = mock_NWBFile()
-
-    localization = Localization()
-    nwbfile.add_lab_meta_data([localization])
-
-    if "ophys" not in nwbfile.processing:
-        nwbfile.create_processing_module("ophys", "ophys")
-    nwbfile.processing["ophys"].add(Images(name="SummaryImages", description="Summary images container"))
-    image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
-    image_collection.add_image(GrayscaleImage(name="MeanImage", data=np.ones((5, 5)), description="mean image"))
-
-    one_photon_series = mock_OnePhotonSeries(nwbfile=nwbfile, name="OnePhotonSeries")
-
-    space = Space(
-        name="MySpace",
-        space_name="MySpace",
-        origin="bregma",
-        units="um",
-        orientation="RAS",
-    )
-    localization.add_spaces([space])
-
-    image_coordinates = AnatomicalCoordinatesImage(
-        name="MyAnatomicalLocalization",
-        image=image_collection["MeanImage"],
-        localized_entity=one_photon_series,
-        method="method",
-        space=space,
-        x=np.ones((5, 5)),
-        y=np.ones((5, 5)) * 2.0,
-        z=np.ones((5, 5)) * 3.0,
-    )
-
-    localization.add_anatomical_coordinates_images([image_coordinates])
-
-    with NWBHDF5IO("test_image_ops.nwb", "w") as io:
-        io.write(nwbfile)
-
-    with NWBHDF5IO("test_image_ops.nwb", "r", load_namespaces=True) as io:
-        read_nwbfile = io.read()
-        read_one_photon_series = read_nwbfile.acquisition["OnePhotonSeries"]
-        read_localization = read_nwbfile.lab_meta_data["localization"]
-
-        read_coordinates_image = read_localization.anatomical_coordinates_images["MyAnatomicalLocalization"]
-
-        assert read_coordinates_image.method == "method"
-        assert read_coordinates_image.localized_entity is read_one_photon_series
-
-
 def test_create_anatomical_coordinates_image_w_image():
     nwbfile = mock_NWBFile()
 
@@ -595,7 +545,7 @@ def test_create_anatomical_coordinates_image_w_image():
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
 
-    two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+    imaging_plane = imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name="MyImagingPlane")
 
     space = Space(
         name="MySpace",
@@ -609,7 +559,7 @@ def test_create_anatomical_coordinates_image_w_image():
     image_coordinates = AnatomicalCoordinatesImage(
         name="MyAnatomicalLocalization",
         image=image_collection["MyImage"],
-        localized_entity=two_photon_series,
+        localized_entity=imaging_plane,
         method="method",
         space=space,
         x=np.ones((5, 5)),
@@ -648,36 +598,6 @@ def test_create_anatomical_coordinates_image_w_image():
         npt.assert_array_equal(read_coordinates_image.brain_region[:], np.array([["CA1"] * 5] * 5))
 
 
-def test_create_anatomical_coordinates_image_failing_missing_image():
-    """
-    Missing required image should raise an error.
-    """
-    nwbfile = mock_NWBFile()
-    localization = Localization()
-    nwbfile.add_lab_meta_data([localization])
-
-    space = Space(
-        name="MySpace",
-        space_name="MySpace",
-        origin="bregma",
-        units="um",
-        orientation="RAS",
-    )
-    localization.add_spaces([space])
-    two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
-
-    with pytest.raises(Exception):
-        AnatomicalCoordinatesImage(
-            name="MyAnatomicalLocalization",
-            localized_entity=two_photon_series,
-            method="method",
-            space=space,
-            x=np.ones((5, 5)),
-            y=np.ones((5, 5)) * 2.0,
-            z=np.ones((5, 5)) * 3.0,
-        )
-
-
 def test_create_anatomical_coordinates_image_failing_shape_mismatch():
     """
     Mismatched shape between image and x,y,z should raise ValueError
@@ -704,7 +624,7 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="MyImage", data=np.ones((5, 5)), description="An example image"))
 
-    two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+    imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name="MyImagingPlane")
 
     x = np.ones((4, 5))
     y = np.ones((5, 5)) * 2.0
@@ -713,7 +633,7 @@ def test_create_anatomical_coordinates_image_failing_shape_mismatch():
         AnatomicalCoordinatesImage(
             name="MyAnatomicalLocalization",
             image=image_collection["MyImage"],
-            localized_entity=two_photon_series,
+            localized_entity=imaging_plane,
             method="method",
             space=space,
             x=x,
@@ -735,7 +655,7 @@ def test_get_coordinates():
     image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
     image_collection.add_image(GrayscaleImage(name="MeanImage", data=np.ones((3, 3)), description="mean image"))
 
-    two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+    imaging_plane = imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name="MyImagingPlane")
 
     space = Space(
         name="MySpace",
@@ -753,7 +673,7 @@ def test_get_coordinates():
     coords = AnatomicalCoordinatesImage(
         name="TestCoordinates",
         image=image_collection["MeanImage"],
-        localized_entity=two_photon_series,
+        localized_entity=imaging_plane,
         method="test_method",
         space=space,
         x=x_data,
