@@ -118,8 +118,8 @@ For imaging data, you can use `AnatomicalCoordinatesImage` to store anatomical c
 This is useful when you want to localize a field of view or register imaging data to a reference atlas.
 
 Each `AnatomicalCoordinatesImage` requires:
-- An `Image` object (required) — the reference image (e.g. mean or max projection) on which the coordinate map is based
-- A `localized_entity` (optional) — a `OnePhotonSeries` or `TwoPhotonSeries` that this coordinate map applies to
+- An `Image` object (optional) — the reference image (e.g. mean or max projection) on which the coordinate map is based
+- A `localized_entity` (optional) — a `ImagingPlane` associated with the OnePhotonSeries or TwoPhotonSeries that this coordinate map applies t
 
 The x, y, and z datasets store 2D arrays of coordinates for each pixel in the image, x[i, j], y[i, j], z[i, j] give the anatomical coordinates location for pixel (i, j).
 The `get_coordinates()` function return the image with anatomical coordinates per pixel:
@@ -209,7 +209,7 @@ localization.add_anatomical_coordinates_tables([table])
 
 ```python
 from pynwb.testing.mock.file import mock_NWBFile
-from pynwb.testing.mock.ophys import mock_TwoPhotonSeries
+from pynwb.testing.mock.ophys import mock_ImagingPlane
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
 import numpy as np
@@ -228,7 +228,7 @@ image_collection = nwbfile.processing["ophys"].data_interfaces["SummaryImages"]
 image_collection.add_image(GrayscaleImage(name="MeanImage", data=np.ones((512, 512)), description="Mean projection"))
 
 # The recording series this coordinate map applies to
-two_photon_series = mock_TwoPhotonSeries(nwbfile=nwbfile, name="TwoPhotonSeries")
+imaging_plane = mock_ImagingPlane(nwbfile=nwbfile, name="MyImagingPlane")
 
 space = AllenCCFv3Space()
 localization.add_spaces([space])
@@ -236,7 +236,7 @@ localization.add_spaces([space])
 image_coordinates = AnatomicalCoordinatesImage(
     name="MyAnatomicalLocalization",
     image=image_collection["MeanImage"],
-    localized_entity=two_photon_series,
+    localized_entity=imaging_plane,
     method="manual registration",
     space=space,
     x=np.ones((512, 512)),
