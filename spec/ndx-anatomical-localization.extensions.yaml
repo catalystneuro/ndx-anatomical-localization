@@ -113,8 +113,7 @@ groups:
         doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
   - neurodata_type_def: NMTv2Space
     neurodata_type_inc: Space
-    doc:
-      "The NIMH Macaque Template version 2.0 symmetric (Jung et al. 2021).
+    doc: "The NIMH Macaque Template version 2.0 symmetric (Jung et al. 2021).
       This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
       with millimeter units. The origin (0,0,0) is at ear bar zero."
     attributes:
@@ -136,8 +135,7 @@ groups:
         doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
   - neurodata_type_def: NMTv2AsymmetricSpace
     neurodata_type_inc: Space
-    doc:
-      "The NIMH Macaque Template version 2.0 asymmetric (Jung et al. 2021).
+    doc: "The NIMH Macaque Template version 2.0 asymmetric (Jung et al. 2021).
       This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
       with millimeter units. The origin (0,0,0) is at ear bar zero. Unlike the symmetric variant,
       this template preserves population-level hemispheric differences."
@@ -160,8 +158,7 @@ groups:
         doc: "Orientation of the coordinate system (fixed to RAS, indicating positive axis directions)"
   - neurodata_type_def: MEBRAINSSpace
     neurodata_type_inc: Space
-    doc:
-      "The MEBRAINS macaque brain atlas version 1.0 (Balan et al. 2024).
+    doc: "The MEBRAINS macaque brain atlas version 1.0 (Balan et al. 2024).
       This canonical space uses RAS orientation (positive x=Right, positive y=Anterior, positive z=Superior)
       with millimeter units. The origin (0,0,0) is at the anterior commissure."
     attributes:
@@ -226,12 +223,12 @@ groups:
         doc: "The space in which the coordinates are defined"
         name: space
       - target_type: Image
-        quantity: 1
+        quantity: "?"
         doc: "The reference image (e.g. mean or max projection) on which the coordinate map is based"
         name: image
-      - target_type: ImageSeries
+      - target_type: ImagingPlane
         quantity: "?"
-        doc: "The imaging series (OnePhotonSeries or TwoPhotonSeries) that this coordinate map applies to"
+        doc: "The imaging plane associated with the OnePhotonSeries or TwoPhotonSeries that this coordinate map applies to"
         name: localized_entity
     attributes:
       - name: method
@@ -284,7 +281,6 @@ groups:
             - null
         doc: 2D array of brain region names for each pixel
         quantity: "?"
-
 
   - neurodata_type_def: Landmarks
     neurodata_type_inc: DynamicTable
